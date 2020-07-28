@@ -1,9 +1,11 @@
 const express = require('express')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const createUserRouter = ({ User }) => {
     const router = express.Router()
 
+    // === BEFORE LOGIN ===
     // login
     router.post('/login', async (req, res) => {
         User.findOne({
@@ -17,7 +19,7 @@ const createUserRouter = ({ User }) => {
                     })
                 }
 
-                // 
+                // compare password with the existing in DB
                 bcrypt.compare(req.body.password, user.password)
                     .then((valid) => {
                         if (!valid) {
@@ -26,9 +28,14 @@ const createUserRouter = ({ User }) => {
                             })
                         }
 
+                        // generate token
+                        const token = jwt.sign({ userId: user.id },
+                            'RANDOM_TOKEN_SECRET',
+                            { expiresIn: '24h' })
+
                         res.status(200).json({
                             userId: user.id,
-                            token: 'token'
+                            token: token
                         })
                     })
                     .catch((error) => {
@@ -67,6 +74,12 @@ const createUserRouter = ({ User }) => {
                     error: error
                 })
             })
+    })
+
+    // === AFTER LOGIN ===
+    // user - get info
+    router.get('/info', async (req, res, next) => {
+        
     })
 
     return router
