@@ -7,7 +7,6 @@ const createProductRouter = ({ Product }) => {
     router.get('/:id', async (req, res) => {
         // find by primary key = find by id
         const product = await Product.findByPk(req.params.id)
-
         if (product) {
             res.send(product)
         } else {

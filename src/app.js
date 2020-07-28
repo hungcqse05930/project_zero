@@ -13,6 +13,7 @@ const createApp = async ({ database }) => {
 
     app.use('/product', createProductRouter(models))
     app.use('/user', createUserRouter(models))
+    app.use('/fruit', createFruitRouter(models))
 
     return app
 }
