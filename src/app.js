@@ -12,7 +12,7 @@ const createApp = async ({ database }) => {
     const models = await createModels(database)
 
     app.use('/product', createProductRouter(models))
-    // app.use('/user', createUserRouter(models))
+    app.use('/user', createUserRouter(models))
 
     return app
 }

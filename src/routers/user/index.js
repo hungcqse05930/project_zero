@@ -12,7 +12,7 @@ const createUserRouter = ({ User }) => {
             .then((user) => {
                 // wrong phone number
                 if (!user) {
-                    res.sendStatus(401).json({
+                    return res.status(401).json({
                         error: new Error('No such phone number! 🥱')
                     })
                 }
@@ -21,7 +21,7 @@ const createUserRouter = ({ User }) => {
                 bcrypt.compare(req.body.password, user.password)
                     .then((valid) => {
                         if (!valid) {
-                            res.sendStatus(401).json({
+                            return res.status(401).json({
                                 error: new Error('Invalid password. 😑')
                             })
                         }
@@ -32,13 +32,13 @@ const createUserRouter = ({ User }) => {
                         })
                     })
                     .catch((error) => {
-                        res.sendStatus(500).json({
+                        return res.status(500).json({
                             error: error
                         })
                     })
             })
             .catch((error) => {
-                res.sendStatus(500).json({
+                return res.status(500).json({
                     error: error
                 })
             })
@@ -63,11 +63,13 @@ const createUserRouter = ({ User }) => {
                 })
             })
             .catch((error) => {
-                res.sendStatus(500).json({
+                return res.status(500).json({
                     error: error
                 })
             })
     })
+
+    return router
 }
 
 module.exports = {
