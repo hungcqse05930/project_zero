@@ -1,10 +1,11 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 
 const createFruitRouter = ({ Fruit }) => {
     const router = express.Router()
 
     // get Fruit by title
-    router.get('/:id', async (req, res) => {
+    router.get('/:title', async (req, res) => {
         // find by primary key = find by id
         const fruit = await Fruit.findOne(title)
 
@@ -48,22 +49,24 @@ const createFruitRouter = ({ Fruit }) => {
     // })
 
     // Insert Fruit
-    router.post('/', (req, res, next) => {
-        const fruit = await new Fruit.create({
+    router.post('/', async (req, res) => {
+        const fruit = {
             title: req.body.title,
             icon_url: req.body.icon_url
-        })
-
-        if (fruit instanceof Fruit) {
-            res.sendStatus(200)
-        } else {
-            res.sendStatus(403)
         }
+
+        await Fruit.create(fruit)
+            .then(data => res.send(data))
+            .catch(err => {
+                res.status(500).send({
+                    message: err.message
+                })
+            })
     })
 
     return router
 }
 
 module.exports = {
-    createProductRouter
+    createFruitRouter,
 }

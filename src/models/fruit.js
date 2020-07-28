@@ -8,6 +8,7 @@ const createFruitModel = (sequelize) => {
         id: {
             type: DataTypes.BIGINT,
             primaryKey: true,
+            autoIncrement: true
         },
         title: {
             type: DataTypes.STRING
@@ -21,7 +22,7 @@ const createFruitModel = (sequelize) => {
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'product',
+        tableName: 'fruit',
         // compulsary
         timestamps: false,
     })

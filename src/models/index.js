@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize')
 const { createProductModel } = require('./product')
 const { createUserModel } = require('./user')
-const { SelectAllFruit } = require('./fruit')
+const { createFruitModel } = require('./fruit')
 
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
@@ -17,7 +17,7 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
     return {
         Product: createProductModel(sequelize),
         User: createUserModel(sequelize),
-        fruit: SelectAllFruit(sequelize)
+        Fruit: createFruitModel(sequelize)
     }
 }
 
