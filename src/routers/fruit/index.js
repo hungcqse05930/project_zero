@@ -33,22 +33,6 @@ const createFruitRouter = ({ Fruit }) => {
     })
 
     // Insert Fruit
-    // router.get('/', async (req, res) => {
-    //     // offset: number of records you skip
-    //     const offset = Number.parseInt(req.query.offset) || 0
-    //     // limit: number of records you get
-    //     const limit = Number.parseInt(req.query.limit) || 10
-
-    //     const Fruit = await Fruit.findAll({ offset, limit })
-
-    //     if(Fruit){
-    //         res.send(Fruit)
-    //     } else {
-    //         res.sendStatus(404)
-    //     }
-    // })
-
-    // Insert Fruit
     router.post('/', async (req, res) => {
         const fruit = {
             title: req.body.title,

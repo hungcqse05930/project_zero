@@ -7,7 +7,7 @@ const {
     // DB_USER = 'tddakk',
     DB_USER = 'root',
     // DB_PASS = '0mqMw0Gis8I5zi2v',
-    DB_PASS = 'hungpR098',
+    DB_PASS = '123456',
     DB_NAME = 'semo_2.0',
 } = process.env
 
