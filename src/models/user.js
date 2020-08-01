@@ -7,7 +7,8 @@ const createUserModel = (sequelize) => {
     return User.init({
         id: {
             type: DataTypes.BIGINT,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
         },
         phone: {
             type: DataTypes.STRING
@@ -21,7 +22,7 @@ const createUserModel = (sequelize) => {
         gender: {
             type: DataTypes.TINYINT
         },
-        avatar_url: {
+        img_url: {
             type: DataTypes.TEXT
         },
         user_status: {

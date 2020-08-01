@@ -1,6 +1,10 @@
+// library
 const express = require('express')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+
+// middlewares
+const auth = require('../../middlewares/auth')
 
 const createUserRouter = ({ User }) => {
     const router = express.Router()
@@ -9,9 +13,12 @@ const createUserRouter = ({ User }) => {
     // login
     router.post('/login', async (req, res) => {
         User.findOne({
-            phone: req.body.phone
+            where: {
+                phone: req.body.phone
+            }
         })
             .then((user) => {
+                console.log(user.id)
                 // wrong phone number
                 if (!user) {
                     return res.status(401).json({
@@ -46,7 +53,7 @@ const createUserRouter = ({ User }) => {
             })
             .catch((error) => {
                 return res.status(500).json({
-                    error: error
+                    error: error.message
                 })
             })
     })
@@ -78,7 +85,11 @@ const createUserRouter = ({ User }) => {
 
     // === AFTER LOGIN ===
     // user - get info
+<<<<<<< HEAD
     router.get('/info', async (req, res, next) => {
+=======
+    router.get('/info', auth, async (req, res, next) => {
+>>>>>>> 9e31f969cc0ff7be71687c969dee9e0f6bb91f37
 
     })
     // get user_name by user_id from (product) 
