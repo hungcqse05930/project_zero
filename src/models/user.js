@@ -21,7 +21,7 @@ const createUserModel = (sequelize) => {
         gender: {
             type: DataTypes.TINYINT
         },
-        avatar_url: {
+        img_url: {
             type: DataTypes.TEXT
         },
         user_status: {
