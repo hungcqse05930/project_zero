@@ -85,15 +85,11 @@ const createUserRouter = ({ User }) => {
 
     // === AFTER LOGIN ===
     // user - get info
-<<<<<<< HEAD
-    router.get('/info', async (req, res, next) => {
-=======
     router.get('/info', auth, async (req, res, next) => {
->>>>>>> 9e31f969cc0ff7be71687c969dee9e0f6bb91f37
 
     })
     // get user_name by user_id from (product) 
-    router.get('/:id', async (req, res) => {
+    router.get('/:id', auth, async (req, res) => {
         // find by primary key = find by id
         const user = await User.findOne(
             { attributes: ['name'] },
