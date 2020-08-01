@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 
-const createinstituteQualityAccreditationModel = ({ InstituteQualityAccreditation }) => {
+const createinstituteQualityAccreditationRouter = ({ InstituteQualityAccreditation }) => {
     const router = express.Router()
 
     // get InstituteQualityAccreditation by name
@@ -54,5 +54,5 @@ const createinstituteQualityAccreditationModel = ({ InstituteQualityAccreditatio
 }
 
 module.exports = {
-    createFruitRouter,
+    createinstituteQualityAccreditationRouter,
 }
