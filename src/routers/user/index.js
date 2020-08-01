@@ -79,21 +79,63 @@ const createUserRouter = ({ User }) => {
     // === AFTER LOGIN ===
     // user - get info
     router.get('/info', async (req, res, next) => {
-        
+
     })
     // get user_name by user_id from (product) 
     router.get('/:id', async (req, res) => {
         // find by primary key = find by id
         const user = await User.findOne(
-            {attributes: ['name'] },
+            { attributes: ['name'] },
             { where: { id: req.params.id } }
-            )
-
+        )
         if (user) {
             res.send(user)
         } else {
             res.sendStatus(404)
         }
+    })
+
+    //get aution_id by product_id
+    router.get('/', async (req, res) => {
+        // find by primary key = find by id
+        const auctions = await Auction.findAll(
+            { attributes: ['id'] },
+            { where: { product_id: req.params.id } },
+            {
+                include: [
+                    {
+                        model: Product,
+                        required: false,
+                    }]
+            }
+        ).then(auctions => {
+            if (auctions) {
+                res.send(auctions)
+            } else {
+                res.sendStatus(404)
+            }
+        });
+    })
+
+    // get all person bid that product by aution_id
+    router.get('/', async (req, res) => {
+        // find by primary key = find by id
+        const autionBid = await AuctionBid.findAll(
+            { attributes: ['id', 'amount', 'date_created'] },
+            { where: { id: req.params.auctions.id } },
+            {
+                include: [{
+                    model: User,
+                    required: false,
+                }]
+            }
+        ).then(products => {
+            if (products) {
+                res.send(products)
+            } else {
+                res.sendStatus(404)
+            }
+        });
     })
 
     return router

@@ -77,6 +77,24 @@ const createProductRouter = ({ Product }) => {
     })
 
 
+    // get all person bid that product
+    router.get('/', async (req, res) => {
+        // find by primary key = find by id
+        const products = await Product.findAll({
+            include: [{
+                model: User,
+                where: {id: req.params.user_id},
+                required: false,
+               }]
+            }).then(products => {
+                if(products){
+                    res.send(products)
+                } else {
+                    res.sendStatus(404)
+                }
+            });
+    })
+
     // get all products
     router.get('/', async (req, res) => {
         // offset: number of records you skip
