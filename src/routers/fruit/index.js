@@ -2,13 +2,14 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const auth = require('../../middlewares/auth')
 
+
 const createFruitRouter = ({ Fruit }) => {
     const router = express.Router()
 
-    // get Fruit by title
-    router.get('/:title', async (req, res) => {
+    // get titleOfFruit by id
+    router.get('/:id', async (req, res) => {
         // find by primary key = find by id
-        const fruit = await Fruit.findOne(title)
+        const fruit = await Fruit.findOne({ where: { id: req.params.id } })
 
         if (fruit) {
             res.send(fruit)
@@ -34,24 +35,7 @@ const createFruitRouter = ({ Fruit }) => {
     })
 
     // Insert Fruit
-    // router.get('/', async (req, res) => {
-    //     // offset: number of records you skip
-    //     const offset = Number.parseInt(req.query.offset) || 0
-    //     // limit: number of records you get
-    //     const limit = Number.parseInt(req.query.limit) || 10
-
-    //     const Fruit = await Fruit.findAll({ offset, limit })
-
-    //     if(Fruit){
-    //         res.send(Fruit)
-    //     } else {
-    //         res.sendStatus(404)
-    //     }
-    // })
-
-    // Insert Fruit
-    router.post('/', auth, async (req, res) => {
-    console.info(req.body)
+    router.post('/', async (req, res) => {
         const fruit = {
             title: req.body.title,
             icon_url: req.body.icon_url

@@ -1,7 +1,7 @@
 const { Sequelize, Model, DataTypes } = require('sequelize')
 
 const createProductModel = (sequelize) => {
-    class Product extends Model {}
+    class Product extends Model { }
 
     // return class' structure
     return Product.init({
@@ -13,7 +13,10 @@ const createProductModel = (sequelize) => {
         user_id: {
             type: DataTypes.BIGINT
         },
-        product_id: {
+        fruit_id: {
+            type: DataTypes.BIGINT
+        },
+        address_id: {
             type: DataTypes.BIGINT
         },
         title: {

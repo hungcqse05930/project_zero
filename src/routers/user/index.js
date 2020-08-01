@@ -88,6 +88,20 @@ const createUserRouter = ({ User }) => {
     router.get('/info', auth, async (req, res, next) => {
 
     })
+    // get user_name by user_id from (product) 
+    router.get('/:id', async (req, res) => {
+        // find by primary key = find by id
+        const user = await User.findOne(
+            {attributes: ['name'] },
+            { where: { id: req.params.id } }
+            )
+
+        if (user) {
+            res.send(user)
+        } else {
+            res.sendStatus(404)
+        }
+    })
 
     return router
 }
