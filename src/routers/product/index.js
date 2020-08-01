@@ -43,7 +43,7 @@ const createProductRouter = ({ Product }) => {
             })
     })
     // get GetIdProductAndIdUser after create product chưa hoàn thành
-    router.get('/:id', async (req, res) => {
+    router.get('/id/:id', async (req, res) => {
         // find by primary key = find by id
         const product = await Product.findOne(
             {
@@ -60,7 +60,7 @@ const createProductRouter = ({ Product }) => {
     })
 
     //get product at that product_id and user_id (selectTitleProduct) (selectStartDateProduct) (selectWeight_PricecurStep) (selectInformationOfProduct)
-    router.get('/:user_id', async (req, res) => {
+    router.get('/user/:user_id', async (req, res) => {
         // find by primary key = find by id
         await Product.findAll({
             where: {
