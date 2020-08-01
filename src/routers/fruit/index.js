@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const auth = require('../../middlewares/auth')
 
 const createFruitRouter = ({ Fruit }) => {
     const router = express.Router()
@@ -49,7 +50,8 @@ const createFruitRouter = ({ Fruit }) => {
     // })
 
     // Insert Fruit
-    router.post('/', async (req, res) => {
+    router.post('/', auth, async (req, res) => {
+    console.info(req.body)
         const fruit = {
             title: req.body.title,
             icon_url: req.body.icon_url
