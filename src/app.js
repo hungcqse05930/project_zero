@@ -2,10 +2,14 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const { createModels } = require('./models/index')
+const { createAddressRouter } = require('./routers/address')
+const { createAuctionRouter } = require('./routers/auction')
+const { createAuctionBidRouter } = require('./routers/auction_bid')
+const { createFruitRouter } = require('./routers/fruit')
+const { createInstitutionRouter } = require('./routers/institution')
 const { createProductRouter } = require('./routers/product')
 const { createUserRouter } = require('./routers/user')
-const { createFruitRouter } = require('./routers/fruit')
-const { createModels } = require('./models/index')
 
 // async func: wait until database connection is authentic ated and succeeded
 const createApp = async ({ database }) => {
@@ -26,10 +30,13 @@ const createApp = async ({ database }) => {
     app.use(bodyParser.urlencoded({ extended: false }))
     // app.use(cors)
 
+    app.use('/address', createAddressRouter(models))
+    app.use('/auction_bid/', createAuctionBidRouter(models))
+    app.use('/auction', createAuctionRouter(models))
+    app.use('/fruit', createFruitRouter(models))
+    app.use('/institution', createInstitutionRouter(models))
     app.use('/product', createProductRouter(models))
     app.use('/user', createUserRouter(models))
-    app.use('/fruit', createFruitRouter(models))
-
     return app
 }
 

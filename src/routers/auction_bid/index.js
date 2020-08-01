@@ -1,7 +1,6 @@
 const express = require('express')
-const bodyParser = require('body-parser')
 
-const createAuctionBidModel = ({ AuctionBid }) => {
+const createAuctionBidRouter = ({ AuctionBid }) => {
     const router = express.Router()
 
 
@@ -9,5 +8,5 @@ const createAuctionBidModel = ({ AuctionBid }) => {
 }
 
 module.exports = {
-    createAuctionBidModel,
+    createAuctionBidRouter,
 }
