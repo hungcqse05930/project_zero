@@ -1,13 +1,14 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 
+
 const createFruitRouter = ({ Fruit }) => {
     const router = express.Router()
 
-    // get Fruit by title
-    router.get('/:title', async (req, res) => {
+    // get titleOfFruit by id
+    router.get('/:id', async (req, res) => {
         // find by primary key = find by id
-        const fruit = await Fruit.findOne(title)
+        const fruit = await Fruit.findOne({ where: { id: req.params.id } })
 
         if (fruit) {
             res.send(fruit)

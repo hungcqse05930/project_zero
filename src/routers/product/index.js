@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const { Op  } = require("sequelize");
 
 const createProductRouter = ({ Product }) => {
     const router = express.Router()
@@ -57,14 +58,16 @@ const createProductRouter = ({ Product }) => {
         }
     })
 
-    // get title product
-    router.get('/:title', async (req, res) => {
+    //get product at that product_id and user_id (selectTitleProduct) (selectStartDateProduct) (selectWeight_PricecurStep) (selectInformationOfProduct)
+    router.get('/:user_id', async (req, res) => {
         // find by primary key = find by id
-        const product = await Product.findOne({
-            order : ['id' , 'DESC'],
-            user_id : req.params.user_id,
-            id : req.params.id,
-            limit: 1
+        await Product.findAll({
+            where: {
+                [Op.and]: [
+                    {user_id: req.params.user_id},
+                    {id:req.params.id}
+                ]               
+              }
         })
         if (product) {
             res.send(product)
