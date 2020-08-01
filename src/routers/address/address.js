@@ -5,9 +5,13 @@ const createAddressRouter = ({ Address }) => {
     const router = express.Router()
 
     // get address_id by address chưa xong
-    router.get('/:id', async (req, res) => {
-        // find by primary key = find by id
-        
+    router.get('/', async (req, res) => {
+        // offset: number of records you skip
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 10
+
+        const fruit = await Address.findAll({ offset, limit })
 
         if (address) {
             res.send(address)
