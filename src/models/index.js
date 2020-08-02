@@ -4,6 +4,8 @@ const { createUserModel } = require('./user')
 const { createFruitModel } = require('./fruit')
 const { createinstituteQualityAccreditationModel } = require('./instituteQualityAccreditation')
 const { createAddressModel } = require('./address') 
+const { createAuctionBidModel } = require('./auction_bid') 
+const { createAuctionModel } = require('./auction') 
 
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
@@ -21,7 +23,9 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         User: createUserModel(sequelize),
         Fruit: createFruitModel(sequelize),
         InstituteQualityAccreditation: createinstituteQualityAccreditationModel(sequelize),
-        Address : createAddressModel (sequelize)
+        Address : createAddressModel (sequelize),
+        AuctionBid : createAuctionBidModel (sequelize),
+        Auction : createAuctionModel (sequelize)
     }
 }
 
