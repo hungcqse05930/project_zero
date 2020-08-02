@@ -6,6 +6,9 @@ const { createinstituteQualityAccreditationModel } = require('./instituteQuality
 const { createAddressModel } = require('./address') 
 const { createAuctionBidModel } = require('./auction_bid') 
 const { createAuctionModel } = require('./auction') 
+const { createWalletModel } = require('./wallet') 
+const { createProductMediaModel } = require('./product_media') 
+const { createProductUpdateModel } = require('./product_update') 
 
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
@@ -25,7 +28,10 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         InstituteQualityAccreditation: createinstituteQualityAccreditationModel(sequelize),
         Address : createAddressModel (sequelize),
         AuctionBid : createAuctionBidModel (sequelize),
-        Auction : createAuctionModel (sequelize)
+        Auction : createAuctionModel (sequelize),
+        Wallet : createWalletModel (sequelize),
+        ProductMedia : createProductMediaModel (sequelize),
+        ProductUpdate : createProductUpdateModel(sequelize)
     }
 }
 

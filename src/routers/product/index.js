@@ -50,7 +50,7 @@ const createProductRouter = ({ Product }) => {
                 order: ['id', 'DESC'],
                 limit: 1
             },
-            { attributes: ['id' , 'user_id'] }
+            { attributes: ['id', 'user_id'] }
         )
         if (product) {
             res.send(product)
@@ -87,6 +87,106 @@ const createProductRouter = ({ Product }) => {
 
         const products = await Product.findAll({ offset, limit })
 
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // get AdminReview
+    router.get('/', async (req, res) => {
+        const products = await Product.findAll({
+            where: { id: req.params.id },
+            include: [
+                {
+                    model: User,
+                    required: false,
+                }]
+        })
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // get post by id for adminReview
+    router.get('/', async (req, res) => {
+        const products = await Product.findAll({
+            where: { id: req.params.id },
+            include: [
+                {
+                    model: User,
+                    required: false,
+                }]
+        })
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // get top 6 post from db (kiêm luôn Get newest post)
+    router.get('/', async (req, res) => {
+        const products = await Product.findAll({
+            attributes: ['id', 'views', 'media_url', 'title', 'price_cur', ['datediff(date_closure,date_created)', 'remain_day']],
+            where: { id: req.params.id },
+            limit: 1,
+            order: ['views', 'DESC'],
+            include: [
+
+                { model: auction, attributes: ['id'] },
+                { model: address, attributes: ['user_id'] },
+                { model: product_media, attributes: ['id'] },
+                { required: false, }
+            ]
+
+        })
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // Get oldest post
+    router.get('/', async (req, res) => {
+        const products = await Product.findAll({
+            attributes: ['id', 'views', 'media_url', 'title', 'price_cur', ['datediff(date_closure,date_created)', 'remain_day']],
+            where: { id: req.params.id },
+            limit: 1,
+            order: ['views', 'DESC'],
+            include: [
+
+                { model: auction, attributes: ['id'] },
+                { model: address, attributes: ['user_id'] },
+                { model: product_media, attributes: ['id'] },
+                { required: false, }
+            ]
+
+        })
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    
+    //Get all product to display into post dashboard page
+    router.get('/', async (req, res) => {
+        const products = await Product.findAll({
+            distinct : true,
+            include: [
+                { model: fruit, attributes: ['fruit_id'] },
+                { model: user, attributes: ['user_id'] },
+                { model: product_update, attributes: ['id'] },
+                { required: false, }
+            ]
+
+        })
         if (products) {
             res.send(products)
         } else {
