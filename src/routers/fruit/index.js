@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const auth = require('../../middlewares/auth')
 
 
 const createFruitRouter = ({ Fruit }) => {
