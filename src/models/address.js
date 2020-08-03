@@ -34,7 +34,7 @@ const createAddressModel = (sequelize) => {
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'product',
+        tableName: 'address',
         // compulsary
         timestamps: false,
     })

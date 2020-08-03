@@ -58,7 +58,7 @@ const createProductUpdateModel = (sequelize) => {
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'product',
+        tableName: 'product_update',
         // compulsary
         timestamps: false,
     })

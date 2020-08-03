@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize')
 const { createProductModel } = require('./product')
 const { createUserModel } = require('./user')
 const { createFruitModel } = require('./fruit')
-const { createinstituteQualityAccreditationModel } = require('./instituteQualityAccreditation')
+const { createInstitutionModel } = require('./institution')
 const { createAddressModel } = require('./address') 
 const { createAuctionBidModel } = require('./auction_bid') 
 const { createAuctionModel } = require('./auction') 
@@ -25,7 +25,7 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         Product: createProductModel(sequelize),
         User: createUserModel(sequelize),
         Fruit: createFruitModel(sequelize),
-        InstituteQualityAccreditation: createinstituteQualityAccreditationModel(sequelize),
+        Institution: createInstitutionModel(sequelize),
         Address : createAddressModel (sequelize),
         AuctionBid : createAuctionBidModel (sequelize),
         Auction : createAuctionModel (sequelize),

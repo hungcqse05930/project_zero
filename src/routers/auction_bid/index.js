@@ -3,6 +3,8 @@ const express = require('express')
 const createAuctionBidRouter = ({ AuctionBid }) => {
     const router = express.Router()
 
+    // PENDING
+    // !! model
     //get selectAllBidOfUser
     router.get('/', async (req, res) => {
         // find by primary key = find by id
