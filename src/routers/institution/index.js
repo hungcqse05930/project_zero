@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const createInstitutionRouter = ({ Institution }) => {
     const router = express.Router()
 
+    // APPROVED
     // get institution by name
     router.get('/:id', async (req, res) => {
         // find by primary key = find by id
@@ -16,6 +17,7 @@ const createInstitutionRouter = ({ Institution }) => {
         }
     })
 
+    // APPROVED
     // get all institution
     router.get('/', async (req, res) => {
         // offset: number of records you skip
@@ -32,7 +34,8 @@ const createInstitutionRouter = ({ Institution }) => {
         }
     })
 
-    // Insert v
+    // APPROVED
+    // Insert institution
     router.post('/', async (req, res) => {
         const institution = {
             name: req.body.name,
