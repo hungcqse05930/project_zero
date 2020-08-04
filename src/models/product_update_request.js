@@ -34,7 +34,7 @@ const createProductUpdateRequestModel = (sequelize) => {
         diameter_avg: {
             type: DataTypes.FLOAT
         },
-        price_int: {
+        price_init: {
             type: DataTypes.DOUBLE
         },
         price_step: {

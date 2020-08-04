@@ -7,7 +7,7 @@ const sequelize = require('sequelize')
 
 
 
-const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest , User }) => {
+const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }) => {
     const router = express.Router()
 
     // Review post by id
@@ -53,11 +53,15 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest , User 
             })
     })
 
+    //Screen name: Dashboard - 1
+    //Function name: getAllProduct
+    //Description: Get all product for displaying
+    //Created by: HaPTH
     //Get all product to display into post dashboard page
     router.get('/', async (req, res) => {
-        Product.belongsTo(Fruit, { foreignKey: 'fruit_id'})
-        Fruit.hasMany(Product, { foreignKey: 'fruit_id'})
-        
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+
         Product.belongsTo(User, { foreignKey: 'user_id' })
         User.hasMany(Product, { foreignKey: 'user_id' })
 
