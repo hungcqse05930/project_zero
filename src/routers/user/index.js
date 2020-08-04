@@ -5,8 +5,9 @@ const jwt = require('jsonwebtoken')
 
 // middlewares
 const auth = require('../../middlewares/auth')
+// const { Model } = require('sequelize/types')
 
-const createUserRouter = ({ User, Product }) => {
+const createUserRouter = ({ User, Product, }) => {
     const router = express.Router()
 
     // === BEFORE LOGIN ===
@@ -106,6 +107,47 @@ const createUserRouter = ({ User, Product }) => {
         }
     })
 
+    // get user_name , rating , avatar_url
+    router.get('/product/:id', async (req, res) => {
+        // find by primary key = find by id
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        const user = await Product.findAll(
+            {
+                where: { id: req.params.id },
+                include: [{
+                    model: User,
+                    require: true
+                }]
+            })
+        if (user) {
+            res.send(user)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // Update update name , DOB , gender vaos bang user
+    router.post('/:id', async (req, res) => {
+        // find by primary key = find by id
+        const user = await User.update(
+            {
+                name: req.params.name,
+                gender : req.params.gender,
+                dob : req.params.dob,
+                where: {
+                    id: req.params.id
+                }
+            })
+        if (user) {
+            res.send(user)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    
+
     // //get aution_id by product_id
     // router.get('/', async (req, res) => {
     //     // find by primary key = find by id
@@ -128,7 +170,7 @@ const createUserRouter = ({ User, Product }) => {
     //     });
     // })
 
-    
+
 
     return router
 }

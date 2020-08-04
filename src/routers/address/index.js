@@ -29,6 +29,23 @@ const createAddressRouter = ({ Address }) => {
         }
     })
 
+    // inser new address for new user
+    router.post('/', async (req, res) => {
+        const address = {
+            province: req.body.province,
+            district: req.body.district,
+            ward : req.body.ward,
+            address: req.body.address    
+        }
+        await Address.create(address)
+            .then(data => res.send(data))
+            .catch(err => {
+                res.status(500).send({
+                    message: err.message
+                })
+            })
+    })
+
     return router
 }
 
