@@ -2,11 +2,12 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const { Op } = require("sequelize");
 
-const createProductRouter = ({ Product }) => {
+const createProductRouter = ({ Product, User, Auction, Address, ProductMedia }) => {
     const router = express.Router()
 
+    // APPROVED
     // get product by id
-    router.get('/:id', async (req, res) => {
+    router.get('/id/:id', async (req, res) => {
         // find by primary key = find by id
         const product = await Product.findByPk(req.params.id)
         if (product) {
@@ -16,7 +17,8 @@ const createProductRouter = ({ Product }) => {
         }
     })
 
-    //Create Product  cần check
+    // APPROVED
+    // Create Product  cần check
     router.post('/', async (req, res) => {
         const product = {
             user_id: req.body.user_id,
@@ -31,6 +33,7 @@ const createProductRouter = ({ Product }) => {
             price_init: req.body.price_init,
             price_step: req.body.price_step,
             price_cur: req.body.price_cur,
+            product_type: req.body.product_status,
             product_status: req.body.product_status
         }
 
@@ -42,41 +45,41 @@ const createProductRouter = ({ Product }) => {
                 })
             })
     })
+
+    // APPROVED
     // get GetIdProductAndIdUser after create product chưa hoàn thành
-    router.get('/id/:id', async (req, res) => {
+    // get user id and product id of the latest post posted by this user
+    router.get('/user/latest/:id', async (req, res) => {
         // find by primary key = find by id
-        const product = await Product.findOne(
+        // const product = await 
+        Product.findOne(
             {
-                order: ['id', 'DESC'],
-                limit: 1
-            },
-            { attributes: ['id', 'user_id'] }
-        )
-        if (product) {
-            res.send(product)
-        } else {
-            res.sendStatus(404)
-        }
-    })
-
-    //get product at that product_id and user_id (selectTitleProduct) (selectStartDateProduct) (selectWeight_PricecurStep) (selectInformationOfProduct)
-    router.get('/user/:user_id', async (req, res) => {
-        // find by primary key = find by id
-        await Product.findAll({
-            where: {
-                [Op.and]: [
-                    { user_id: req.params.user_id },
-                    { id: req.params.id }
-                ]
+                where: {
+                    user_id: req.params.id
+                },
+                order: [
+                    ['id', 'DESC']
+                ],
+                attributes: ['id', 'user_id']
             }
+        ).then(product => {
+            if (!product) {
+                res.sendStatus(404)
+            } else {
+                res.send(product)
+            }
+        }).catch(error => {
+            res.sendStatus(500).json({
+                error: error.message
+            })
         })
-        if (product) {
-            res.send(product)
-        } else {
-            res.sendStatus(404)
-        }
-    })
 
+        // if (product) {
+        //     res.send(product)
+        // } else {
+        //     res.sendStatus(404)
+        // }
+    })
 
     // get all products
     router.get('/', async (req, res) => {
@@ -94,8 +97,13 @@ const createProductRouter = ({ Product }) => {
         }
     })
 
-    // get AdminReview
-    router.get('/', async (req, res) => {
+    // PENDING
+    // !! move to admin
+    // !! add fruit 
+    // get post and user by id
+    router.get('/product/:id', async (req, res) => {
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+        User.hasMany(Product, { foreignKey: 'user_id' })
         const products = await Product.findAll({
             where: { id: req.params.id },
             include: [
@@ -111,38 +119,45 @@ const createProductRouter = ({ Product }) => {
         }
     })
 
-    // get post by id for adminReview
-    router.get('/', async (req, res) => {
-        const products = await Product.findAll({
-            where: { id: req.params.id },
-            include: [
+    // PENDING
+    // sequelize is not defined
+    // get top 10 post from db (kiêm luôn Get newest post)
+    router.get('/latest/', async (req, res) => {
+        // product 1 - n auction
+        Product.hasOne(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product)
+
+        // address 1 - n product
+        Address.hasOne(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address)
+
+        // product 1 - n product_media
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product)
+
+        const products = await Auction.findAll({
+            attributes: ['id', 'views', 'price_cur', Sequelize.fn('timestampdiff', Sequelize.literal('year'), Sequelize.col('date_closure'), Sequelize.fn('currdate'))],
+            limit: 10,
+            order: ['views', 'DESC'],
+            include: [{
+                model: Product,
+                attributes: ['title', 'weight'],
+                required: true,
+                include: [{
+                    model: Address,
+                    attributes: ['province'],
+                    required: true
+                },
                 {
-                    model: User,
-                    required: false,
-                }]
-        })
-        if (products) {
-            res.send(products)
-        } else {
-            res.sendStatus(404)
-        }
-    })
-
-    // get top 6 post from db (kiêm luôn Get newest post)
-    router.get('/', async (req, res) => {
-        const products = await Product.findAll({
-            attributes: ['id', 'views', 'media_url', 'title', 'price_cur', ['datediff(date_closure,date_created)', 'remain_day']],
-            where: { id: req.params.id },
-            limit: 1,
-            order: ['views', 'DESC'],
-            include: [
-
-                { model: auction, attributes: ['id'] },
-                { model: address, attributes: ['user_id'] },
-                { model: product_media, attributes: ['id'] },
-                { required: false, }
+                    model: ProductMedia,
+                    attributes: ['media_url'],
+                    order: ['id', 'DESC'],
+                    limit: 1,
+                    required: true
+                }
+                ]
+            }
             ]
-
         })
         if (products) {
             res.send(products)
@@ -151,48 +166,27 @@ const createProductRouter = ({ Product }) => {
         }
     })
 
-    // Get oldest post
-    router.get('/', async (req, res) => {
-        const products = await Product.findAll({
-            attributes: ['id', 'views', 'media_url', 'title', 'price_cur', ['datediff(date_closure,date_created)', 'remain_day']],
-            where: { id: req.params.id },
-            limit: 1,
-            order: ['views', 'DESC'],
-            include: [
-
-                { model: auction, attributes: ['id'] },
-                { model: address, attributes: ['user_id'] },
-                { model: product_media, attributes: ['id'] },
-                { required: false, }
-            ]
-
-        })
-        if (products) {
-            res.send(products)
-        } else {
-            res.sendStatus(404)
-        }
-    })
-
-    
+    // 
     //Get all product to display into post dashboard page
-    router.get('/', async (req, res) => {
-        const products = await Product.findAll({
-            distinct : true,
-            include: [
-                { model: fruit, attributes: ['fruit_id'] },
-                { model: user, attributes: ['user_id'] },
-                { model: product_update, attributes: ['id'] },
-                { required: false, }
-            ]
+    // router.get('/', async (req, res) => {
+    //     const products = await Product.findAll({
+    //         distinct: true,
+    //         include: [{
+    //             model: fruit,
+    //             model: user,
+    //             model: product_update,
+    //             required: false,
+    //         }]
 
-        })
-        if (products) {
-            res.send(products)
-        } else {
-            res.sendStatus(404)
-        }
-    })
+    //     })
+    //     if (products) {
+    //         res.send(products)
+    //     } else {
+    //         res.sendStatus(404)
+    //     }
+    // })
+
+    //deleteProductById
 
     return router
 }

@@ -28,7 +28,7 @@ const createProductMediaModel = (sequelize) => {
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'product',
+        tableName: 'product_media',
         // compulsary
         timestamps: false,
     })

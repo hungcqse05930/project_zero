@@ -1,47 +1,50 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 
-const createInstitutionRouter = ({ InstituteQualityAccreditation }) => {
+const createInstitutionRouter = ({ Institution }) => {
     const router = express.Router()
 
-    // get InstituteQualityAccreditation by name
-    router.get('/:name', async (req, res) => {
+    // APPROVED
+    // get institution by name
+    router.get('/:id', async (req, res) => {
         // find by primary key = find by id
-        const instituteQualityAccreditation = await InstituteQualityAccreditation.findOne(name)
+        const institution = await Institution.findByPk(req.params.id)
 
-        if (InstituteQualityAccreditation) {
-            res.send(InstituteQualityAccreditation)
+        if (institution) {
+            res.send(institution)
         } else {
             res.sendStatus(404)
         }
     })
 
-    // get all InstituteQualityAccreditation
+    // APPROVED
+    // get all institution
     router.get('/', async (req, res) => {
         // offset: number of records you skip
         const offset = Number.parseInt(req.query.offset) || 0
         // limit: number of records you get
         const limit = Number.parseInt(req.query.limit) || 10
 
-        const instituteQualityAccreditation = await InstituteQualityAccreditation.findAll({ offset, limit })
+        const institution = await Institution.findAll({ offset, limit })
 
-        if (instituteQualityAccreditation) {
-            res.send(instituteQualityAccreditation)
+        if (institution) {
+            res.send(institution)
         } else {
             res.sendStatus(404)
         }
     })
 
-    // Insert InstituteQualityAccreditation
+    // APPROVED
+    // Insert institution
     router.post('/', async (req, res) => {
-        const instituteQualityAccreditation = {
+        const institution = {
             name: req.body.name,
             province: req.body.province,
             address: req.body.address,
             phone_num: req.body.phone_num
         }
 
-        await InstituteQualityAccreditation.create(instituteQualityAccreditation)
+        await Institution.create(institution)
             .then(data => res.send(data))
             .catch(err => {
                 res.status(500).send({

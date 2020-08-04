@@ -1,10 +1,10 @@
 const { Sequelize, Model, DataTypes } = require('sequelize')
 
-const createinstituteQualityAccreditationModel = (sequelize) => {
-    class InstituteQualityAccreditation extends Model { }
+const createInstitutionModel = (sequelize) => {
+    class Institution extends Model { }
 
     // return class' structure
-    return InstituteQualityAccreditation.init({
+    return Institution.init({
         id: {
             type: DataTypes.BIGINT,
             primaryKey: true,
@@ -25,12 +25,12 @@ const createinstituteQualityAccreditationModel = (sequelize) => {
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'institute_quality_accreditation',
+        tableName: 'institution',
         // compulsary
         timestamps: false,
     })
 }
 
 module.exports = {
-    createinstituteQualityAccreditationModel,
+    createInstitutionModel,
 }

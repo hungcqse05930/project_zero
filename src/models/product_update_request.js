@@ -1,10 +1,10 @@
 const { Sequelize, Model, DataTypes } = require('sequelize')
 
-const createProductUpdateModel = (sequelize) => {
-    class ProductUpdate extends Model { }
+const createProductUpdateRequestModel = (sequelize) => {
+    class ProductUpdateRequest extends Model { }
 
     // return class' structure
-    return ProductUpdate.init({
+    return ProductUpdateRequest.init({
         id: {
             type: DataTypes.BIGINT,
             primaryKey: true,
@@ -13,44 +13,35 @@ const createProductUpdateModel = (sequelize) => {
         product_id: {
             type: DataTypes.BIGINT
         },
-        fruit_id: {
-            type: DataTypes.BIGINT
-        },
-        address_id: {
+        admin_id: {
             type: DataTypes.BIGINT
         },
         title: {
             type: DataTypes.STRING
         },
-        product_type: {
-            type: DataTypes.TINYINT
-        },
-        weight : {
+        weight: {
             type: DataTypes.DOUBLE
         },
-        fruit_pct : {
+        fruit_pct: {
             type: DataTypes.FLOAT
         },
-        sugar_pct : {
+        sugar_pct: {
             type: DataTypes.FLOAT
         },
-        weight_avg : {
+        weight_avg: {
             type: DataTypes.FLOAT
         },
-        diameter_avg : {
+        diameter_avg: {
             type: DataTypes.FLOAT
         },
-        price_init : {
+        price_int: {
             type: DataTypes.DOUBLE
         },
-        price_step : {
+        price_step: {
             type: DataTypes.DOUBLE
         },
-        price_cur : {
-            type: DataTypes.DOUBLE
-        },
-        product_status:{
-            type: DataTypes.TINYINT
+        notes: {
+            type: DataTypes.STRING
         },
         date_created: {
             type: 'TIMESTAMP'
@@ -58,12 +49,12 @@ const createProductUpdateModel = (sequelize) => {
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'product_update',
+        tableName: 'product_update_request',
         // compulsary
         timestamps: false,
     })
 }
 
 module.exports = {
-    createProductUpdateModel,
+    createProductUpdateRequestModel,
 }

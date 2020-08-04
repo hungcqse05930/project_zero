@@ -29,16 +29,16 @@ const createProductModel = (sequelize) => {
             type: DataTypes.DOUBLE
         },
         fruit_pct: {
-            type: DataTypes.DOUBLE
+            type: DataTypes.FLOAT
         },
         sugar_pct: {
-            type: DataTypes.DOUBLE
+            type: DataTypes.FLOAT
         },
         weight_avg: {
-            type: DataTypes.DOUBLE
+            type: DataTypes.FLOAT
         },
         diameter_avg: {
-            type: DataTypes.DOUBLE
+            type: DataTypes.FLOAT
         },
         price_init: {
             type: DataTypes.DOUBLE
