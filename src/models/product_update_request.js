@@ -1,29 +1,23 @@
 const { Sequelize, Model, DataTypes } = require('sequelize')
 
-const createProductModel = (sequelize) => {
-    class Product extends Model { }
+const createProductUpdateRequestModel = (sequelize) => {
+    class ProductUpdateRequest extends Model { }
 
     // return class' structure
-    return Product.init({
+    return ProductUpdateRequest.init({
         id: {
             type: DataTypes.BIGINT,
             primaryKey: true,
             autoIncrement: true
         },
-        user_id: {
+        product_id: {
             type: DataTypes.BIGINT
         },
-        fruit_id: {
-            type: DataTypes.BIGINT
-        },
-        address_id: {
+        admin_id: {
             type: DataTypes.BIGINT
         },
         title: {
             type: DataTypes.STRING
-        },
-        product_type: {
-            type: DataTypes.TINYINT
         },
         weight: {
             type: DataTypes.DOUBLE
@@ -40,17 +34,14 @@ const createProductModel = (sequelize) => {
         diameter_avg: {
             type: DataTypes.FLOAT
         },
-        price_init: {
+        price_int: {
             type: DataTypes.DOUBLE
         },
         price_step: {
             type: DataTypes.DOUBLE
         },
-        price_cur: {
-            type: DataTypes.DOUBLE
-        },
-        product_status: {
-            type: DataTypes.TINYINT
+        notes: {
+            type: DataTypes.STRING
         },
         date_created: {
             type: 'TIMESTAMP'
@@ -58,12 +49,12 @@ const createProductModel = (sequelize) => {
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'product',
+        tableName: 'product_update_request',
         // compulsary
         timestamps: false,
     })
 }
 
 module.exports = {
-    createProductModel,
+    createProductUpdateRequestModel,
 }

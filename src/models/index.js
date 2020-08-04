@@ -9,6 +9,8 @@ const { createAuctionModel } = require('./auction')
 const { createWalletModel } = require('./wallet') 
 const { createProductMediaModel } = require('./product_media') 
 const { createProductUpdateModel } = require('./product_update') 
+const { createProductUpdateRequestModel } = require('./product_update_request') 
+
 
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
@@ -31,7 +33,8 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         Auction : createAuctionModel (sequelize),
         Wallet : createWalletModel (sequelize),
         ProductMedia : createProductMediaModel (sequelize),
-        ProductUpdate : createProductUpdateModel(sequelize)
+        ProductUpdate : createProductUpdateModel(sequelize),
+        ProductUpdateRequest : createProductUpdateRequestModel(sequelize)
     }
 }
 
