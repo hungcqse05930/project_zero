@@ -112,29 +112,31 @@ const createUserRouter = ({ User, Product, }) => {
         // find by primary key = find by id
         Product.belongsTo(User, { foreignKey: 'user_id' })
         User.hasMany(Product, { foreignKey: 'user_id' })
-        const user = await Product.findAll(
+        const users = await Product.findOne(
             {
                 where: { id: req.params.id },
                 include: [{
                     model: User,
+                    attributes: ['name', 'img_url', 'rate'],
                     require: true
                 }]
             })
-        if (user) {
-            res.send(user)
+        if (users) {
+            res.send(users)
         } else {
             res.sendStatus(404)
         }
     })
 
     // Update update name , DOB , gender vaos bang user
-    router.post('/:id', async (req, res) => {
-        // find by primary key = find by id
+    router.put('/:id', async (req, res) => {
         const user = await User.update(
             {
-                name: req.params.name,
-                gender : req.params.gender,
-                dob : req.params.dob,
+                name: req.body.name,
+                gender: req.body.gender,
+                dob: req.body.dob,
+            },
+            {
                 where: {
                     id: req.params.id
                 }
@@ -142,11 +144,11 @@ const createUserRouter = ({ User, Product, }) => {
         if (user) {
             res.send(user)
         } else {
-            res.sendStatus(404)
+            res.sendStatus(error)
         }
     })
 
-    
+
 
     // //get aution_id by product_id
     // router.get('/', async (req, res) => {

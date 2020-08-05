@@ -9,8 +9,10 @@ const createFruitRouter = ({ Fruit }) => {
     // get titleOfFruit by id
     router.get('/:id', async (req, res) => {
         // find by primary key = find by id
-        const fruit = await Fruit.findOne({ where: { id: req.params.id } })
-
+        const fruit = await Fruit.findOne({
+            attributes: ['title'],
+            where: { id: req.params.id }
+        })
         if (fruit) {
             res.send(fruit)
         } else {
@@ -25,7 +27,7 @@ const createFruitRouter = ({ Fruit }) => {
         // limit: number of records you get
         const limit = Number.parseInt(req.query.limit) || 10
 
-        const fruit = await Fruit.findAll({ offset, limit })
+        const fruit = await Fruit.findAll({ attributes: ['title'], offset, limit })
 
         if (fruit) {
             res.send(fruit)
