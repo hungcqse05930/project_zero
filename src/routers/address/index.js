@@ -50,7 +50,7 @@ const createAddressRouter = ({ Address }) => {
     })
     // address in forms
 
-    // get city
+    // get provinces
     router.get('/province', (_, res) => {
         https.get('https://thongtindoanhnghiep.co/api/city', (response) => {
             // let provinces = response.LtsItem
@@ -62,7 +62,20 @@ const createAddressRouter = ({ Address }) => {
             response.pipe(res).once('error', () => res.sendStatus(500))
         }).end()
     })
+
+    // get districts in a city
+    router.get('/province/:id/district', (req, res) => {
+        https.get(`https://thongtindoanhnghiep.co/api/city/${req.params.id}/district`, (response) => {
+            response.pipe(res).once('error', () => res.sendStatus(500))
+        }).end()
+    })
   
+    // get wards in a district
+    router.get('/district/:id/ward', (req, res) => {
+        https.get(`https://thongtindoanhnghiep.co/api/district/${req.params.id}/ward`, (response) => {
+            response.pipe(res).once('error', () => res.sendStatus(500))
+        })
+    })
     return router
 }
 
