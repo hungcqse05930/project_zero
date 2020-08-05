@@ -1,6 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 
 const createProductRouter = ({ Product, User, Auction, Address, ProductMedia , Fruit }) => {
     const router = express.Router()
@@ -136,7 +136,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia , F
         ProductMedia.belongsTo(Product)
 
         const products = await Auction.findAll({
-            attributes: ['id', 'views', 'price_cur', Sequelize.fn('timestampdiff', Sequelize.literal('year'), Sequelize.col('date_closure'), Sequelize.fn('currdate'))],
+            attributes: ['id', 'views', 'price_cur', [Sequelize.fn('timediff', Sequelize.col('date_closure'), Sequelize.fn('CURRENT_TIMESTAMP')), 'remain']],
             limit: 10,
             order: ['views', 'DESC'],
             include: [{

@@ -134,16 +134,17 @@ const createUserRouter = ({ User, Product, }) => {
     })
 
     // Update update name , DOB , gender vaos bang user
-    router.put('/:id', async (req, res) => {
+    router.put('/signup/info', async (req, res) => {
         const user = await User.update(
             {
                 name: req.body.name,
                 gender: req.body.gender,
                 dob: req.body.dob,
+                default_address: req.body.default_address || 0
             },
             {
                 where: {
-                    id: req.params.id
+                    id: req.body.id
                 }
             })
         if (user) {
