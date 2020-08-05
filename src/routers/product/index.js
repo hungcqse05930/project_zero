@@ -2,7 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const { Op } = require("sequelize");
 
-const createProductRouter = ({ Product, User, Auction, Address, ProductMedia }) => {
+const createProductRouter = ({ Product, User, Auction, Address, ProductMedia , Fruit }) => {
     const router = express.Router()
 
     // APPROVED
@@ -99,25 +99,25 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia }) 
 
     // PENDING
     // !! move to admin
-    // !! add fruit 
+    // !! add fruit phải có cả fruit id
     // get post and user by id
-    router.get('/product/:id', async (req, res) => {
-        Product.belongsTo(User, { foreignKey: 'user_id' })
-        User.hasMany(Product, { foreignKey: 'user_id' })
-        const products = await Product.findAll({
-            where: { id: req.params.id },
-            include: [
-                {
-                    model: User,
-                    required: false,
-                }]
-        })
-        if (products) {
-            res.send(products)
-        } else {
-            res.sendStatus(404)
-        }
-    })
+    // router.get('/product/:id', async (req, res) => {
+    //     Product.belongsTo(User, { foreignKey: 'user_id' })
+    //     User.hasMany(Product)
+    //     const products = await Product.findAll({
+    //         where: { id: req.params.id },
+    //         include: [
+    //             {
+    //                 model: User,
+    //                 required: false,
+    //             }]
+    //     })
+    //     if (products) {
+    //         res.send(products)
+    //     } else {
+    //         res.sendStatus(404)
+    //     }
+    // })
 
     // PENDING
     // sequelize is not defined
@@ -165,26 +165,6 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia }) 
             res.sendStatus(404)
         }
     })
-
-    // 
-    //Get all product to display into post dashboard page
-    // router.get('/', async (req, res) => {
-    //     const products = await Product.findAll({
-    //         distinct: true,
-    //         include: [{
-    //             model: fruit,
-    //             model: user,
-    //             model: product_update,
-    //             required: false,
-    //         }]
-
-    //     })
-    //     if (products) {
-    //         res.send(products)
-    //     } else {
-    //         res.sendStatus(404)
-    //     }
-    // })
 
     //deleteProductById
 

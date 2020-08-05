@@ -10,7 +10,7 @@ const createAuctionBidModel = (sequelize) => {
             primaryKey: true,
             autoIncrement: true
         },
-        auction_bid: {
+        auction_id: {
             type: DataTypes.BIGINT
         },
         bidder_user_id: {

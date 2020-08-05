@@ -12,6 +12,7 @@ const { createProductRouter } = require('./routers/product')
 const { createUserRouter } = require('./routers/user')
 const { createWalletRouter } = require('./routers/wallet')
 const { createAdminRouter } = require('./routers/admin')
+const { createIdentityRouter } = require('./routers/identity')
 
 // async func: wait until database connection is authentic ated and succeeded
 const createApp = async ({ database }) => {
@@ -40,7 +41,7 @@ const createApp = async ({ database }) => {
     app.use('/product', createProductRouter(models))
     app.use('/user', createUserRouter(models))
     app.use('/wallet', createWalletRouter(models))
-
+    app.use('/identity', createIdentityRouter(models))
     app.use('/admin', createAdminRouter(models))
     return app
 }

@@ -7,13 +7,13 @@ const sequelize = require('sequelize')
 
 
 
-const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest }) => {
+const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }) => {
     const router = express.Router()
 
     // Review post by id
     router.get('/:id', async (req, res) => {
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
-        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Fruit.hasMany(Product)
         const products = await Product.findAll({
             where: { id: req.params.id },
             distinct: true,
@@ -51,6 +51,37 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest }) => {
                     message: err.message
                 })
             })
+    })
+
+    //Screen name: Dashboard - 1
+    //Function name: getAllProduct
+    //Description: Get all product for displaying
+    //Created by: HaPTH
+    //Get all product to display into post dashboard page
+    router.get('/', async (req, res) => {
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+        User.hasMany(Product, { foreignKey: 'user_id' })
+
+        const products = await Product.findAll({
+            distinct: true,
+            include: [{
+                model: User,
+                required: true,
+            },
+            {
+                model: Fruit,
+                required: true
+            }]
+        })
+        
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
     })
 
     return router

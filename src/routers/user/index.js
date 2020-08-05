@@ -5,8 +5,9 @@ const jwt = require('jsonwebtoken')
 
 // middlewares
 const auth = require('../../middlewares/auth')
+// const { Model } = require('sequelize/types')
 
-const createUserRouter = ({ User }) => {
+const createUserRouter = ({ User, Product, }) => {
     const router = express.Router()
 
     // === BEFORE LOGIN ===
@@ -93,13 +94,17 @@ const createUserRouter = ({ User }) => {
     router.get('/info', auth, async (req, res, next) => {
 
     })
+
     // get user_name by user_id from (product) 
-    router.get('/:id', auth, async (req, res) => {
+    router.get('/:id', async (req, res) => {
         // find by primary key = find by id
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+        User.hasMany(Product, { foreignKey: 'user_id' })
         const user = await User.findOne(
-            { attributes: ['name'] },
-            { where: { id: req.params.id } }
-        )
+            {
+                attributes: ['name'],
+                where: { id: req.params.id }
+            })
         if (user) {
             res.send(user)
         } else {
@@ -107,48 +112,70 @@ const createUserRouter = ({ User }) => {
         }
     })
 
-    //get aution_id by product_id
-    router.get('/', async (req, res) => {
+    // get user_name , rating , avatar_url
+    router.get('/product/:id', async (req, res) => {
         // find by primary key = find by id
-        const auctions = await Auction.findAll(
-            { attributes: ['id'] },
-            { where: { product_id: req.params.id } },
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        const user = await Product.findAll(
             {
-                include: [
-                    {
-                        model: Product,
-                        required: false,
-                    }]
-            }
-        ).then(auctions => {
-            if (auctions) {
-                res.send(auctions)
-            } else {
-                res.sendStatus(404)
-            }
-        });
-    })
-
-    // get all person bid that product by aution_id
-    router.get('/', async (req, res) => {
-        // find by primary key = find by id
-        const autionBid = await AuctionBid.findAll(
-            { attributes: ['id', 'amount', 'date_created'] },
-            { where: { id: req.params.auctions.id } },
-            {
+                where: { id: req.params.id },
                 include: [{
                     model: User,
-                    required: false,
+                    require: true
                 }]
-            }
-        ).then(products => {
-            if (products) {
-                res.send(products)
-            } else {
-                res.sendStatus(404)
-            }
-        });
+            })
+        if (user) {
+            res.send(user)
+        } else {
+            res.sendStatus(404)
+        }
     })
+
+    // Update update name , DOB , gender vaos bang user
+    router.post('/:id', async (req, res) => {
+        // find by primary key = find by id
+        const user = await User.update(
+            {
+                name: req.params.name,
+                gender : req.params.gender,
+                dob : req.params.dob,
+                where: {
+                    id: req.params.id
+                }
+            })
+        if (user) {
+            res.send(user)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    
+
+    // //get aution_id by product_id
+    // router.get('/', async (req, res) => {
+    //     // find by primary key = find by id
+    //     const auctions = await Auction.findAll(
+    //         { attributes: ['id'] },
+    //         { where: { product_id: req.params.id } },
+    //         {
+    //             include: [
+    //                 {
+    //                     model: Product,
+    //                     required: false,
+    //                 }]
+    //         }
+    //     ).then(auctions => {
+    //         if (auctions) {
+    //             res.send(auctions)
+    //         } else {
+    //             res.sendStatus(404)
+    //         }
+    //     });
+    // })
+
+
 
     return router
 }
