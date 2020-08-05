@@ -65,15 +65,17 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }
         Product.belongsTo(User, { foreignKey: 'user_id' })
         User.hasMany(Product, { foreignKey: 'user_id' })
 
-        const products = await User.findAll({
+        const products = await Product.findAll({
             distinct: true,
+            attributes:['fruit_id','title','date_created','product_status'],
             include: [{
-                model: Product,
+                model:  Fruit,
                 required: true,
-                include: [{
-                    model: Fruit,
-                    required: true
-                }]
+                attributes:['title']
+            },{
+                model:  User,
+                required: true,
+                attributes:['name']
             }]
         })
         if (products) {
