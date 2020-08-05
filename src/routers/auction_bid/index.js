@@ -43,6 +43,7 @@ const createAuctionBidRouter = ({ AuctionBid, Auction , User }) => {
                 where: { auction_id: req.params.id },
                 include: [{
                     model: User,
+                    attributes:['name'],
                     required: false,
                 }]
             }

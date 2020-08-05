@@ -13,7 +13,7 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }
     // Review post by id
     router.get('/:id', async (req, res) => {
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
-        Fruit.hasMany(Product)
+        Fruit.hasMany(Product , { foreignKey: 'fruit_id' })
         const products = await Product.findAll({
             where: { id: req.params.id },
             distinct: true,
@@ -67,13 +67,15 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }
 
         const products = await Product.findAll({
             distinct: true,
+            attributes:['fruit_id','title','date_created','product_status'],
             include: [{
-                model: User,
+                model:  Fruit,
                 required: true,
-            },
-            {
-                model: Fruit,
-                required: true
+                attributes:['title']
+            },{
+                model:  User,
+                required: true,
+                attributes:['name']
             }]
         })
         
