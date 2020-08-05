@@ -101,23 +101,23 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia , F
     // !! move to admin
     // !! add fruit phải có cả fruit id
     // get post and user by id
-    router.get('/product/:id', async (req, res) => {
-        Product.belongsTo(User, { foreignKey: 'user_id' })
-        User.hasMany(Product)
-        const products = await Product.findAll({
-            where: { id: req.params.id },
-            include: [
-                {
-                    model: User,
-                    required: false,
-                }]
-        })
-        if (products) {
-            res.send(products)
-        } else {
-            res.sendStatus(404)
-        }
-    })
+    // router.get('/product/:id', async (req, res) => {
+    //     Product.belongsTo(User, { foreignKey: 'user_id' })
+    //     User.hasMany(Product)
+    //     const products = await Product.findAll({
+    //         where: { id: req.params.id },
+    //         include: [
+    //             {
+    //                 model: User,
+    //                 required: false,
+    //             }]
+    //     })
+    //     if (products) {
+    //         res.send(products)
+    //     } else {
+    //         res.sendStatus(404)
+    //     }
+    // })
 
     // PENDING
     // sequelize is not defined
@@ -158,25 +158,6 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia , F
                 ]
             }
             ]
-        })
-        if (products) {
-            res.send(products)
-        } else {
-            res.sendStatus(404)
-        }
-    })
-
-    
-    //Get all product to display into post dashboard page
-    router.get('/', async (req, res) => {
-        Product.hasOne(Fruit)
-        Fruit.belongsTo(Product , {foreignKey : "Fruit_id"})
-
-        Product.belongsTo(User, { foreignKey: 'user_id' })
-        User.hasMany(Product)
-
-        const products = await Product.findAll({
-            distinct: true,
         })
         if (products) {
             res.send(products)

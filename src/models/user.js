@@ -25,6 +25,9 @@ const createUserModel = (sequelize) => {
         img_url: {
             type: DataTypes.TEXT
         },
+        dob:{
+            type: DataTypes.DATE
+        },
         user_status: {
             type: DataTypes.TINYINT
         },

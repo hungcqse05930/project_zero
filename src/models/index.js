@@ -10,6 +10,8 @@ const { createWalletModel } = require('./wallet')
 const { createProductMediaModel } = require('./product_media') 
 const { createProductUpdateModel } = require('./product_update') 
 const { createProductUpdateRequestModel } = require('./product_update_request') 
+const { createIdentityModel } = require('./identity') 
+const identity = require('./identity')
 
 
 // like entities
@@ -34,7 +36,8 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         Wallet : createWalletModel (sequelize),
         ProductMedia : createProductMediaModel (sequelize),
         ProductUpdate : createProductUpdateModel(sequelize),
-        ProductUpdateRequest : createProductUpdateRequestModel(sequelize)
+        ProductUpdateRequest : createProductUpdateRequestModel(sequelize),
+        Identity:createIdentityModel(sequelize),
     }
 }
 
