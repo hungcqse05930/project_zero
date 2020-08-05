@@ -72,9 +72,14 @@ const createUserRouter = ({ User }) => {
                 // save to the database
                 user.save().then(() => {
                     res.status(201).json({
-                        message: 'Created! 😋'
+                        user_id: user.id
+                    })
+                }).catch((error) => {
+                    res.status(403).json({
+                        error: error.message
                     })
                 })
+                
             })
             .catch((error) => {
                 return res.status(500).json({

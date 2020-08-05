@@ -1,5 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const https = require('https')
+const { response } = require('express')
 
 const createAddressRouter = ({ Address }) => {
     const router = express.Router()
@@ -20,6 +22,16 @@ const createAddressRouter = ({ Address }) => {
         } else {
             res.sendStatus(404)
         }
+    })
+
+    // address in forms
+
+    const apiCityUrl = 'https://thongtindoanhnghiep.co/api/city';
+    // get city
+    router.get('/province', (_, res) => {
+        https.request(apiCityUrl, response => {
+            response.pipe(res).once('error', () => res.sendStatus(500))
+        }).end()
     })
 
     return router
