@@ -13,7 +13,7 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }
     // Review post by id
     router.get('/:id', async (req, res) => {
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
-        Fruit.hasMany(Product)
+        Fruit.hasMany(Product , { foreignKey: 'fruit_id' })
         const products = await Product.findAll({
             where: { id: req.params.id },
             distinct: true,
