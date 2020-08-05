@@ -1,8 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const { Op } = require("sequelize");
+const { Sequelize,Op } = require('sequelize');
 
-const createProductRouter = ({ Product, User, Auction, Address, ProductMedia , Fruit }) => {
+const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fruit }) => {
     const router = express.Router()
 
     // APPROVED
@@ -120,44 +120,42 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia , F
     // })
 
     // PENDING
+    // Chưa lấy được datediff
     // sequelize is not defined
     // get top 10 post from db (kiêm luôn Get newest post)
     router.get('/latest/', async (req, res) => {
         // product 1 - n auction
-        Product.hasOne(Auction, { foreignKey: 'product_id' })
-        Auction.belongsTo(Product)
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
 
         // address 1 - n product
-        Address.hasOne(Product, { foreignKey: 'address_id' })
-        Product.belongsTo(Address)
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
 
         // product 1 - n product_media
         Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
-        ProductMedia.belongsTo(Product)
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
 
-        const products = await Auction.findAll({
-            attributes: ['id', 'views', 'price_cur', Sequelize.fn('timestampdiff', Sequelize.literal('year'), Sequelize.col('date_closure'), Sequelize.fn('currdate'))],
+        const date = Sequelize.fn('datediff',Sequelize.fn("NOW"),Sequelize.col('date_closure'))
+        const products = await Product.findAll({
+            attributes: ['title', 'id', 'price_cur'],
             limit: 10,
-            order: ['views', 'DESC'],
             include: [{
-                model: Product,
-                attributes: ['title', 'weight'],
+                model: Auction,
+                attributes: ['views'],
+                order: ['views', 'DESC'],
                 required: true,
-                include: [{
-                    model: Address,
-                    attributes: ['province'],
-                    required: true
-                },
-                {
-                    model: ProductMedia,
-                    attributes: ['media_url'],
-                    order: ['id', 'DESC'],
-                    limit: 1,
-                    required: true
-                }
-                ]
-            }
-            ]
+            },
+            {
+                model: Address,
+                attributes: ['province'],
+                required: true
+            },
+            {
+                model: ProductMedia,
+                attributes: ['media_url'],
+                required: true
+            }]
         })
         if (products) {
             res.send(products)
