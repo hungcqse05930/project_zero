@@ -2,6 +2,7 @@
 const express = require('express')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const uniqid = require('uniqid')
 
 // middlewares
 const auth = require('../../middlewares/auth')
@@ -37,13 +38,14 @@ const createUserRouter = ({ User, Product, }) => {
                         }
 
                         // generate token
-                        const token = jwt.sign({ userId: user.id },
+                        const token = jwt.sign({ id: user.id },
                             'RANDOM_TOKEN_SECRET',
                             { expiresIn: '24h' })
 
                         res.status(200).json({
-                            userId: user.id,
-                            token: token
+                            token: token,
+                            id: user.id,
+                            img_dir: user.img_dir
                         })
                     })
                     .catch((error) => {
@@ -65,15 +67,19 @@ const createUserRouter = ({ User, Product, }) => {
         bcrypt.hash(req.body.password, 10)
             .then((hash) => {
                 // new user created
+                const img_dir = uniqid()
+
                 const user = new User({
                     phone: req.body.phone,
-                    password: hash
+                    password: hash,
+                    img_dir: img_dir
                 })
 
                 // save to the database
                 user.save().then(() => {
                     res.status(201).json({
-                        user_id: user.id
+                        user_id: user.id,
+                        img_dir: img_dir
                     })
                 }).catch((error) => {
                     res.status(403).json({
@@ -134,13 +140,12 @@ const createUserRouter = ({ User, Product, }) => {
     })
 
     // Update update name , DOB , gender vaos bang user
-    router.put('/signup/info', async (req, res) => {
+    router.put('/info', async (req, res) => {
         const user = await User.update(
             {
                 name: req.body.name,
                 gender: req.body.gender,
                 dob: req.body.dob,
-                default_address: req.body.default_address || 0
             },
             {
                 where: {
@@ -154,7 +159,23 @@ const createUserRouter = ({ User, Product, }) => {
         }
     })
 
-
+    // Update update name , DOB , gender vaos bang user
+    router.put('/avatar', async (req, res) => {
+        const user = await User.update(
+            {
+                img_url: req.body.img_url
+            },
+            {
+                where: {
+                    id: req.body.id
+                }
+            })
+        if (user) {
+            res.send(user)
+        } else {
+            res.sendStatus(error)
+        }
+    })
 
     // //get aution_id by product_id
     // router.get('/', async (req, res) => {
