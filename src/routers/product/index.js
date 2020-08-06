@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const { Sequelize,Op } = require('sequelize');
+const timediff = require('timediff');
 
 const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fruit }) => {
     const router = express.Router()
@@ -123,7 +124,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
     // Chưa lấy được datediff
     // sequelize is not defined
     // get top 10 post from db (kiêm luôn Get newest post)
-    router.get('/latest/', async (req, res) => {
+    router.get('/latest', async (req, res) => {
         // product 1 - n auction
         Product.hasMany(Auction, { foreignKey: 'product_id' })
         Auction.belongsTo(Product, { foreignKey: 'product_id' })
@@ -136,13 +137,12 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
         ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
 
-        const date = Sequelize.fn('datediff',Sequelize.fn("NOW"),Sequelize.col('date_closure'))
         const products = await Product.findAll({
-            attributes: ['title', 'id', 'price_cur'],
+            attributes: ['title', 'id', 'price_cur'], 
             limit: 10,
             include: [{
                 model: Auction,
-                attributes: ['views'],
+                attributes: ['views' , [Sequelize.fn(timediff, Sequelize.col('date_created', Sequelize.literal('CURRENT_TIMESTAMP'))) , 'remain' ]],
                 order: ['views', 'DESC'],
                 required: true,
             },
