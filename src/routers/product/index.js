@@ -138,11 +138,11 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
 
         const products = await Product.findAll({
-            attributes: ['title', 'id', 'price_cur'], 
+            attributes: ['title', 'id', 'price_cur', 'weight'], 
             limit: 10,
             include: [{
                 model: Auction,
-                attributes: ['views' , [Sequelize.fn('timediff', Sequelize.col('date_created'), Sequelize.literal('CURRENT_TIMESTAMP')) , 'remain' ]],
+                attributes: ['views' , [Sequelize.fn('timediff', Sequelize.col('Auctions.date_created'), Sequelize.literal('CURRENT_TIMESTAMP')) , 'remain' ]],
                 order: ['views', 'DESC'],
                 required: true,
             },

@@ -1,34 +1,43 @@
 const express = require('express')
+const { Sequelize, Op } = require('sequelize')
 
-const createAuctionBidRouter = ({ AuctionBid, Auction , User }) => {
+const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
     const router = express.Router()
 
     // PENDING
     // !! model
-    //get selectAllBidOfUser
+    // get selectAllBidOfUser
     // query đang sai
     router.get('/:id', async (req, res) => {
         // find by primary key = find by id
         AuctionBid.belongsTo(Auction, { foreignKey: 'auction_id' })
         Auction.hasMany(AuctionBid, { foreignKey: 'bidder_user_id' })
+
         const auction_bid = await AuctionBid.count({
             where: { bidder_user_id: req.params.id },
             include: [
                 {
                     model: Auction,
                     required: true,
-                    where: {auction_status: 1}
-                }],            
+                    where: {
+                        auction_status: 1,
+                        bidder_user_id: {
+                            [Op.eq]: Sequelize.col('AuctionBid.bidder_user_id')
+                        }
+                    }
+                }],
         })
-        if (auction_bid) {
-            res.send(Number.auction_bid)
+
+        if (typeof auction_bid == "number") {
+            res.send({
+                times: auction_bid,
+            })
         } else {
             res.sendStatus(404)
         }
-
     })
 
-    
+
 
     // aprove
     // get all person bid at one auction_id
@@ -42,7 +51,7 @@ const createAuctionBidRouter = ({ AuctionBid, Auction , User }) => {
                 where: { auction_id: req.params.id },
                 include: [{
                     model: User,
-                    attributes:['name'],
+                    attributes: ['name'],
                     required: false,
                 }]
             }
