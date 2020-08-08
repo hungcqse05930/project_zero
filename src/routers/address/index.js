@@ -35,10 +35,11 @@ const createAddressRouter = ({ Address }) => {
     // inser new address for new user
     router.post('/', async (req, res) => {
         const address = {
+            user_id: req.body.user_id,
             province: req.body.province,
             district: req.body.district,
             ward: req.body.ward,
-            address: req.body.address
+            address: req.body.address,
         }
         await Address.create(address)
             .then(data => res.send(data))
