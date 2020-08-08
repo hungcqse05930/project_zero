@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const { Sequelize,Op } = require('sequelize');
-const timediff = require('timediff');
+// const timediff = require('timediff');
 
 const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fruit }) => {
     const router = express.Router()
@@ -142,7 +142,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
             limit: 10,
             include: [{
                 model: Auction,
-                attributes: ['views' , [Sequelize.fn(timediff, Sequelize.col('date_created', Sequelize.literal('CURRENT_TIMESTAMP'))) , 'remain' ]],
+                attributes: ['views' , [Sequelize.fn('timediff', Sequelize.col('date_created', Sequelize.literal('CURRENT_TIMESTAMP'))) , 'remain' ]],
                 order: ['views', 'DESC'],
                 required: true,
             },
