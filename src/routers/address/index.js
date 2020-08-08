@@ -1,5 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const https = require('https')
+// const axios = require('axios')
+const { response } = require('express')
 // const { where } = require('sequelize/types')
 
 const createAddressRouter = ({ Address }) => {
@@ -8,7 +11,7 @@ const createAddressRouter = ({ Address }) => {
     // aprove 
     // !! add user_id - done
     // get address_id by address 
-    router.get('/:id', async (req, res) => {
+    router.get('/id/:id', async (req, res) => {
         // offset: number of records you skip
         // User.hasMany(Address , {foreignKey : 'user_id'})
         // Address.belongsTo(User , {foreignKey : 'user_id'})
@@ -18,7 +21,7 @@ const createAddressRouter = ({ Address }) => {
         const limit = Number.parseInt(req.query.limit) || 5
 
         const address = await Address.findAll({
-            where: {user_id : req.params.id},
+            where: { user_id: req.params.id },
             offset, limit
         })
 
@@ -32,10 +35,11 @@ const createAddressRouter = ({ Address }) => {
     // inser new address for new user
     router.post('/', async (req, res) => {
         const address = {
+            user_id: req.body.user_id,
             province: req.body.province,
             district: req.body.district,
-            ward : req.body.ward,
-            address: req.body.address    
+            ward: req.body.ward,
+            address: req.body.address,
         }
         await Address.create(address)
             .then(data => res.send(data))
@@ -45,7 +49,34 @@ const createAddressRouter = ({ Address }) => {
                 })
             })
     })
+    // address in forms
 
+    // get provinces
+    router.get('/province', (_, res) => {
+        https.get('https://thongtindoanhnghiep.co/api/city', (response) => {
+            // let provinces = response.LtsItem
+            // provinces = provinces.map(province => ({
+            //     id: province.ID,
+            //     title: province.Title
+            // }))
+            // res.send(response.LtsItem)
+            response.pipe(res).once('error', () => res.sendStatus(500))
+        }).end()
+    })
+
+    // get districts in a city
+    router.get('/province/:id/district', (req, res) => {
+        https.get(`https://thongtindoanhnghiep.co/api/city/${req.params.id}/district`, (response) => {
+            response.pipe(res).once('error', () => res.sendStatus(500))
+        }).end()
+    })
+  
+    // get wards in a district
+    router.get('/district/:id/ward', (req, res) => {
+        https.get(`https://thongtindoanhnghiep.co/api/district/${req.params.id}/ward`, (response) => {
+            response.pipe(res).once('error', () => res.sendStatus(500))
+        })
+    })
     return router
 }
 

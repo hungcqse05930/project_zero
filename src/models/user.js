@@ -25,6 +25,12 @@ const createUserModel = (sequelize) => {
         img_url: {
             type: DataTypes.TEXT
         },
+        img_dir: {
+            type: DataTypes.TEXT
+        },
+        rate:{
+            type: DataTypes.FLOAT
+        },
         dob:{
             type: DataTypes.DATE
         },
