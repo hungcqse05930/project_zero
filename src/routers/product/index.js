@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const { Sequelize,Op } = require('sequelize');
-const timediff = require('timediff');
+const { Sequelize, Op } = require('sequelize');
+// const timediff = require('timediff');
 
 const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fruit }) => {
     const router = express.Router()
