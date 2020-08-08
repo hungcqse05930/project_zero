@@ -142,7 +142,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
             limit: 10,
             include: [{
                 model: Auction,
-                attributes: ['views' , [Sequelize.fn(timediff, Sequelize.col('date_created', Sequelize.literal('CURRENT_TIMESTAMP'))) , 'remain' ]],
+                attributes: ['views' , [Sequelize.fn('timediff', Sequelize.col('date_created'), Sequelize.literal('CURRENT_TIMESTAMP')) , 'remain' ]],
                 order: ['views', 'DESC'],
                 required: true,
             },
