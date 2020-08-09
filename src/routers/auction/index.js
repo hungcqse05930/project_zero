@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User }) => {
+const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Address, ProductMedia }) => {
     const router = express.Router()
 
     // get auction date created
@@ -21,7 +21,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User }) => {
             {
                 where: { product_id: req.params.id, auction_status: 1 },
                 attributes: ['date_created'],
-                order: ['date_created','DESC']
+                order: ['date_created', 'DESC']
             }
         )
         if (auctions) {
@@ -144,6 +144,49 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User }) => {
 
         if (fruit) {
             res.send(fruit)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // get similar fruit
+    router.get('/similar/:id', async (req, res) => {
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+        const products = await Auction.findAll({
+            attributes: ['views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
+            limit: 10,
+            where: { auction_status: 1 },
+            include: [{
+                model: Product,
+                attributes: ['title', 'id', 'price_cur', 'weight', 'fruit_id'],
+                where: { fruit_id: req.params.id },
+                required: true,
+                include: [
+                    {
+                        model: Address,
+                        attributes: ['province'],
+                        required: true
+                    },
+                    {
+                        model: ProductMedia,
+                        attributes: ['media_url'],
+                        required: true
+                    }]
+            }]
+        })
+        if (products) {
+            res.send(products)
         } else {
             res.sendStatus(404)
         }
