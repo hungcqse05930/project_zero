@@ -52,7 +52,7 @@ const createFruitRouter = ({ Fruit }) => {
             })
     })
 
-    // Insert Fruit where fruit_id = ?
+    // update Fruit where fruit_id = ?
     router.put('/update/:id', async (req, res) => {
         const fruit = await Fruit.update(
             {

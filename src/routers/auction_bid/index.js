@@ -27,7 +27,6 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
                     }
                 }],
         })
-
         if (typeof auction_bid == "number") {
             res.send({
                 times: auction_bid,

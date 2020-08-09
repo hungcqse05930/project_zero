@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAuctionRouter = ({ Auction, Product, AuctionBid }) => {
+const createAuctionRouter = ({ Auction, Product, AuctionBid , Fruit, User }) => {
     const router = express.Router()
 
     // get auction date created
@@ -29,58 +29,6 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid }) => {
             res.sendStatus(404)
         }
 
-    })
-
-    router.get('/latest', async (req, res) => {
-        // product 1 - n auction
-        models.Product.hasMany(models.Auction, { foreignKey: 'product_id' })
-        models.Auction.belongsTo(models.Product, { foreignKey: 'product_id' })
-
-        // address 1 - n product
-        models.Address.hasMany(models.Product, { foreignKey: 'address_id' })
-        models.Product.belongsTo(models.Address, { foreignKey: 'address_id' })
-
-        // product 1 - n product_media
-        models.Product.hasMany(models.ProductMedia, { foreignKey: 'product_id' })
-        models.ProductMedia.belongsTo(models.Product, { foreignKey: 'product_id' })
-
-        const auctions = await models.Auction.findAll({
-            attributes: [
-                'id',
-                [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],
-                'price_cur',
-                'views'
-            ],
-            limit: 10,
-            order: [['views', 'DESC']],
-            include: [
-                {
-                    model: models.Product,
-                    attributes: ['id', 'title', 'weight'],
-                    include: [
-                        {
-                            model: models.Address,
-                            attributes: ['province'],
-                            required: true
-                        },
-                        {
-                            model: models.ProductMedia,
-                            attributes: ['media_url'],
-                            order: [['date_created', 'DESC']],
-                            // required: true
-                        }
-                    ],
-                    required: true
-                }
-            ],
-        })
-
-
-        if (auctions) {
-            res.send(auctions)
-        } else {
-            res.sendStatus(404)
-        }
     })
 
     // get all information of auction
@@ -148,7 +96,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid }) => {
     // vao auction view + 1
     // Update update name , DOB , gender vaos bang user
     router.put('/update/:id', async (req, res) => {
-        
+
         let auction = await Auction.findOne({ where: { product_id: req.params.id } })
         const info = await auction.increment('views', { by: 1 })
 
@@ -158,7 +106,48 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid }) => {
             res.sendStatus(error)
         }
     })
-    
+
+    //select all auction wiht product , fruit , user
+    router.get('/:id', async (req, res) => {
+
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        // offset: number of records you skip
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 5
+
+        const fruit = await Product.findAll({
+            where: { id: req.params.id },
+            include: [{
+                model: Fruit,
+                required: true,
+                attributes: ['title'],
+            },
+            {
+                model: User,
+                attributes: ['name', 'id', 'img_url', 'rate'],
+                required: true,
+            }, {
+                model: Auction,
+                required: true,
+            }]
+        })
+
+        if (fruit) {
+            res.send(fruit)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
 
     return router
 }
