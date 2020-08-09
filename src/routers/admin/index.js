@@ -67,7 +67,7 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }
 
         const products = await Product.findAll({
             distinct: true,
-            attributes:['fruit_id','title','date_created','product_status'],
+            attributes:['id','title','date_created','product_status'],
             include: [{
                 model:  Fruit,
                 required: true,

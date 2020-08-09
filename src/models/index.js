@@ -37,7 +37,7 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         ProductMedia : createProductMediaModel (sequelize),
         ProductUpdate : createProductUpdateModel(sequelize),
         ProductUpdateRequest : createProductUpdateRequestModel(sequelize),
-        Identity:createIdentityModel(sequelize),
+        Identity: createIdentityModel(sequelize),
     }
 }
 
