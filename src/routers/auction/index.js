@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAuctionRouter = ({ Address, Auction, Product, ProductMedia, AuctionBid, Fruit, User }) => {
+const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Address, ProductMedia }) => {
     const router = express.Router()
 
     // get auction date created
@@ -16,11 +16,12 @@ const createAuctionRouter = ({ Address, Auction, Product, ProductMedia, AuctionB
         // find by primary key = find by id
         // Product.hasMany(Auction , {foreignKey: 'product_id'})
         // Auction.belongsTo(Product)
-        // TODO: findAll where datediff: 
-        const auctions = await models.Auction.findAll(
+        // TODO: findAll where datediff 
+        const auctions = await Auction.findAll(
             {
                 where: { product_id: req.params.id, auction_status: 1 },
                 attributes: ['date_created'],
+                order: ['date_created', 'DESC']
             }
         )
         if (auctions) {
@@ -210,6 +211,52 @@ const createAuctionRouter = ({ Address, Auction, Product, ProductMedia, AuctionB
 
         if (fruit) {
             res.send(fruit)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // get similar fruit
+    router.get('/similar/:id', async (req, res) => {
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+        const auction = await Auction.findByPk(req.params.id)
+        const product = await Product.findByPk(auction.product_id)
+
+        const products = await Auction.findAll({
+            attributes: ['id', 'price_cur', 'views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
+            limit: 10,
+            where: { auction_status: 1 },
+            include: [{
+                model: Product,
+                attributes: ['title', 'id', 'weight', 'fruit_id'],
+                where: { fruit_id: product.fruit_id },
+                required: true,
+                include: [
+                    {
+                        model: Address,
+                        attributes: ['province'],
+                        required: true
+                    },
+                    {
+                        model: ProductMedia,
+                        attributes: ['media_url'],
+                        required: true
+                    }]
+            }]
+        })
+        if (products) {
+            res.send(products)
         } else {
             res.sendStatus(404)
         }
