@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAuctionRouter = ({ Auction, Product, AuctionBid , Fruit, User }) => {
+const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User }) => {
     const router = express.Router()
 
     // get auction date created
@@ -124,20 +124,20 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid , Fruit, User }) => 
         // limit: number of records you get
         const limit = Number.parseInt(req.query.limit) || 5
 
-        const fruit = await Product.findAll({
+        const fruit = await Auction.findAll({
             where: { id: req.params.id },
             include: [{
-                model: Fruit,
+                model: Product,
                 required: true,
-                attributes: ['title'],
-            },
-            {
-                model: User,
-                attributes: ['name', 'id', 'img_url', 'rate'],
-                required: true,
-            }, {
-                model: Auction,
-                required: true,
+                include: [
+                    {
+                        model: User,
+                        attributes: ['name', 'id', 'img_url', 'rate'],
+                        required: true,
+                    }, {
+                        model: Fruit,
+                        required: true,
+                    }]
             }]
         })
 
