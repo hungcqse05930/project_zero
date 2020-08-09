@@ -27,7 +27,6 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
                     }
                 }],
         })
-
         if (typeof auction_bid == "number") {
             res.send({
                 times: auction_bid,
@@ -41,7 +40,7 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
 
     // aprove
     // get all person bid at one auction_id
-    router.get('/aution/:id', async (req, res) => {
+    router.get('/auction/:id', async (req, res) => {
         // find by primary key = find by id
         User.hasMany(AuctionBid, { foreignKey: 'bidder_user_id' })
         AuctionBid.belongsTo(User, { foreignKey: 'bidder_user_id' })
@@ -49,6 +48,7 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
         const autionBid = await AuctionBid.findAll(
             {
                 where: { auction_id: req.params.id },
+                order: [['date_created', 'DESC'], ['amount', 'DESC']],
                 include: [{
                     model: User,
                     attributes: ['name'],
