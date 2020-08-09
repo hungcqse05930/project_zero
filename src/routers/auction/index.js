@@ -16,11 +16,12 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User }) => {
         // find by primary key = find by id
         // Product.hasMany(Auction , {foreignKey: 'product_id'})
         // Auction.belongsTo(Product)
-        // TODO: findAll where datediff: 
-        const auctions = await models.Auction.findAll(
+        // TODO: findAll where datediff 
+        const auctions = await Auction.findAll(
             {
                 where: { product_id: req.params.id, auction_status: 1 },
                 attributes: ['date_created'],
+                order: ['date_created','DESC']
             }
         )
         if (auctions) {
