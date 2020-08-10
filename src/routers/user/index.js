@@ -97,7 +97,7 @@ const createUserRouter = ({ User, Product, }) => {
 
     // === AFTER LOGIN ===
     // user - get info
-    router.get('/info', auth, async (req, res, next) => {
+    router.get('/info/', auth, async (req, res, next) => {
 
     })
 
