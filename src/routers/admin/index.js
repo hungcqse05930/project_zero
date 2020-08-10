@@ -9,11 +9,12 @@ const uniqid = require('uniqid')
 
 // middlewares
 const auth = require('../../middlewares/auth')
+const collection_auction = require('../../models/collection_auction')
 // middleware
 
 
 
-const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, ProductMedia }) => {
+const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, ProductMedia,Collection, CollectionAuction }) => {
     const router = express.Router()
 
     // Review post by id
@@ -210,16 +211,35 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
 
     // create collection in collection_auction
     router.post('/setCollection', async (req, res) => {
-        const collections = await collection_auction.create(
-            {
-                collection_id: req.body.collection_id,
-                auction_id: req.body.auction_id
-            })
-        if (collections) {
-            res.send(collections)
-        } else {
-            res.sendStatus(error)
+        const collections = {
+            collection_id: req.body.collection_id,
+            auction_id: req.body.auction_id
         }
+        await CollectionAuction.create(collections)
+            .then(data => res.send(data))
+            .catch(err => {
+                res.status(500).send({
+                    message: err.message
+                })
+            })
+    })
+
+    // create collection 
+    router.post('/createCollection', async (req, res) => {
+        const collections = {
+            creator_admin_id: req.body.creator_admin_id,
+            title: req.body.title,
+            description: req.body.description,
+            img_url: req.body.img_url,
+            date_ended: req.body.date_ended,
+        }
+        await Collection.create(collections)
+            .then(data => res.send(data))
+            .catch(err => {
+                res.status(500).send({
+                    message: err.message
+                })
+            })
     })
 
     return router
