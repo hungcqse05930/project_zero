@@ -11,8 +11,7 @@ const { createProductMediaModel } = require('./product_media')
 const { createProductUpdateModel } = require('./product_update') 
 const { createProductUpdateRequestModel } = require('./product_update_request') 
 const { createIdentityModel } = require('./identity') 
-const identity = require('./identity')
-
+const { createAdminModel } = require('./admin')
 
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
@@ -38,6 +37,7 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         ProductUpdate : createProductUpdateModel(sequelize),
         ProductUpdateRequest : createProductUpdateRequestModel(sequelize),
         Identity: createIdentityModel(sequelize),
+        Admin: createAdminModel(sequelize),
     }
 }
 

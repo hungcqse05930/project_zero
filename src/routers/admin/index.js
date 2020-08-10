@@ -2,16 +2,22 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const sequelize = require('sequelize')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const uniqid = require('uniqid')
 
+
+// middlewares
+const auth = require('../../middlewares/auth')
 // middleware
 
 
 
-const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User ,ProductMedia }) => {
+const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, ProductMedia }) => {
     const router = express.Router()
 
     // Review post by id
-    router.get('/:id', async (req, res) => {
+    router.get('/id/:id', async (req, res) => {
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
         const products = await Product.findAll({
@@ -102,6 +108,83 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User ,
         } else {
             res.sendStatus(404)
         }
+    })
+
+    // select all information of account (select name , img_url , id , trạng thái 'user or admin')
+
+
+    // Update inffomation of account (password)
+    router.put('/userManagement', async (req, res) => {
+        bcrypt.hash(req.body.password, 10)
+            .then((hash) => {
+                const user = User.update(
+                    {
+                        password: hash,
+                    },
+                    {
+                        where: {
+                            id: req.body.id
+                        }
+                    })
+                if (user) {
+                    res.send(user)
+                } else {
+                    res.sendStatus(error)
+                }
+            })
+    })
+
+    // Active or deActive account
+    router.put('/userManagement', async (req, res) => {
+        const admin = await User.update(
+            {
+                user_status: req.body.user_status,
+            },
+            {
+                where: {
+                    id: req.body.id
+                }
+            })
+        if (admin) {
+            res.send(admin)
+        } else {
+            res.sendStatus(error)
+        }
+    })
+
+    // insert new account (admin)
+    // cần xóa status ở bảng admin chưa xóa
+    router.post('/newAdmin', async (req, res) => {
+        bcrypt.hash(req.body.password, 10)
+            .then((hash) => {
+                // new admin created
+
+                const admin = new Admin({
+                    username: req.body.username,
+                    password: hash,
+                    name: req.body.name,
+                    gender: req.body.gender,
+                    dob: req.body.dob,
+                    department: req.body.department,
+                })
+
+                // save to the database
+                admin.save().then(() => {
+                    res.status(201).json({
+                        message: 'successfully create new admin'
+                    })
+                }).catch((error) => {
+                    res.status(403).json({
+                        error: error.message
+                    })
+                })
+
+            })
+            .catch((error) => {
+                return res.status(500).json({
+                    error: error
+                })
+            })
     })
 
     return router
