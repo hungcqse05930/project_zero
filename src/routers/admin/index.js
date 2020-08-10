@@ -110,11 +110,32 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
         }
     })
 
-    // select all information of account (select name , img_url , id , trạng thái 'user or admin')
+    // select information of accountUser (select name , img_url , id , trạng thái)
+    router.get('/userInformation' , async (req,res) =>{
+        const users = await User.findAll({
+            attributes: ['id' , 'name' , 'img_url' , 'user_status'],  
+        })
+        if (users) {
+            res.send(users)
+        } else {
+            res.sendStatus(404)
+        }
+    })
 
+    // select information of accountAdmin (select name , img_url , id , trạng thái)
+    router.get('/adminInformation' , async (req,res) =>{
+        const admins = await Admin.findAll({
+            attributes: ['id' , 'name' , 'department'],  
+        })
+        if (admins) {
+            res.send(admins)
+        } else {
+            res.sendStatus(404)
+        }
+    })
 
     // Update inffomation of account (password)
-    router.put('/userManagement', async (req, res) => {
+    router.put('/userUpdate', async (req, res) => {
         bcrypt.hash(req.body.password, 10)
             .then((hash) => {
                 const user = User.update(
