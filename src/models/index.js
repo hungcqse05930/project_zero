@@ -12,6 +12,8 @@ const { createProductUpdateModel } = require('./product_update')
 const { createProductUpdateRequestModel } = require('./product_update_request') 
 const { createIdentityModel } = require('./identity') 
 const { createAdminModel } = require('./admin')
+const { createCollectionAuctionModel } = require('./collection_auction')
+const { createCollectionModel } = require('./collection')
 
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
@@ -38,6 +40,8 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         ProductUpdateRequest : createProductUpdateRequestModel(sequelize),
         Identity: createIdentityModel(sequelize),
         Admin: createAdminModel(sequelize),
+        Collection : createCollectionModel(sequelize),
+        CollectionAuction : createCollectionAuctionModel(sequelize)
     }
 }
 
