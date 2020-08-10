@@ -1,5 +1,6 @@
 // environment variables only, database config
 const { createApp } = require('./src/app')
+
 const {
     PORT = 3003,
     HOST = '35.240.192.232',
@@ -30,3 +31,4 @@ createApp(appOptions)
             console.info(`App is running at ${PORT}`)
         })
     })
+

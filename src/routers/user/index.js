@@ -100,10 +100,19 @@ const createUserRouter = ({ User, Product, Address }) => {
     // === AFTER LOGIN ===
     // user - get info
     router.get('/info/id/:id', async (req, res, next) => {
+
+        User.hasMany(Address, { foreignKey: 'user_id' })
+        Address.belongsTo(User, { foreignKey: 'user_id' })
+
         const user = await User.findOne({
             attributes: ['phone', 'name', 'gender', 'dob', 'img_url', 'rate', 
-            [Sequelize.fn('timestampdiff', 'month', Sequelize.literal('CURRENT_TIMESTAMP'), Sequelize.col('date_created')), 'membership']],
-            where: { id: req.params.id }
+            [Sequelize.fn('timestampdiff', Sequelize.literal('month'), Sequelize.col('User.date_created'), Sequelize.literal('CURRENT_TIMESTAMP')), 'membership']],
+            where: { id: req.params.id },
+            include: [{
+                model: Address,
+                require:true,
+                attributes:['province'],
+            }]
         })
 
         if(user) {
