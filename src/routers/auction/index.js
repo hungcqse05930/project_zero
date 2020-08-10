@@ -262,6 +262,50 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         }
     })
 
+    // Search bai viet lien quan (20 auction)
+    router.get('/search/:title', async (req, res) => {
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+        const products = await Auction.findAll({
+            attributes: ['id', 'price_cur', 'views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
+            limit: 20,
+            where: { auction_status: 1 },
+            include: [{
+                model: Product,
+                attributes: ['title', 'id', 'weight', 'fruit_id'],
+                where: {
+                    title: { [Op.like]: '%' + req.params.title + '%' }
+                },
+                required: true,
+                include: [
+                    {
+                        model: Address,
+                        attributes: ['province'],
+                        required: true
+                    },
+                    {
+                        model: ProductMedia,
+                        attributes: ['media_url'],
+                        required: true
+                    }]
+            }]
+        })
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
+    })
 
     return router
 }

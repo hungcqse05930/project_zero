@@ -156,7 +156,7 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
             })
     })
 
-    // Active or deActive account
+    // Active or deActive account or Verify identity
     router.put('/userManagement', async (req, res) => {
         const admin = await User.update(
             {

@@ -3,7 +3,7 @@ const express = require('express')
 const createIdentityRouter = ({ Identity }) => {
     const router = express.Router()
 
-    // inser new address for new user
+    // inser new idenity 
     router.post('/', async (req, res) => {
         const identity = {
             user_id: req.body.user_id,
