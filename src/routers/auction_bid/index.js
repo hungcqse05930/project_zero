@@ -64,6 +64,24 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
         }
     })
 
+     // aprove
+    // count all bid of users
+    router.get('/countBid/:id', async (req, res) => {
+        // find by primary key = find by id
+        const autionBid = await AuctionBid.count(
+            {
+                where: { bidder_user_id: req.params.id },
+            }
+        )
+        if (typeof autionBid == "number") {
+            res.send({
+                times: autionBid,
+            })
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
     // add new auction_bid
     router.post('/', async (req, res) => {
         const newABid = {
