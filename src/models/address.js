@@ -13,7 +13,7 @@ const createAddressModel = (sequelize) => {
         user_id: {
             type: DataTypes.BIGINT
         },
-        default: {
+        default_address: {
             type: DataTypes.TINYINT
         },
         province: {
