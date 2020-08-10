@@ -3,12 +3,14 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const uniqid = require('uniqid')
+const { Sequelize, Op, QueryTypes } = require('sequelize')
 
 // middlewares
 const auth = require('../../middlewares/auth')
+// const { where } = require('sequelize/types')
 // const { Model } = require('sequelize/types')
 
-const createUserRouter = ({ User, Product, }) => {
+const createUserRouter = ({ User, Product, Address }) => {
     const router = express.Router()
 
     // === BEFORE LOGIN ===
@@ -86,7 +88,7 @@ const createUserRouter = ({ User, Product, }) => {
                         error: error.message
                     })
                 })
-                
+
             })
             .catch((error) => {
                 return res.status(500).json({
@@ -199,7 +201,28 @@ const createUserRouter = ({ User, Product, }) => {
     //     });
     // })
 
+    // Search nguoi dung lien quan
+    router.get('/search/:name', async (req, res) => {
+        User.hasMany(Address, { foreignKey: 'user_id' })
+        Address.belongsTo(User, { foreignKey: 'user_id' })
 
+        const users = await User.findAll({
+            attributes: ['name', 'img_url', 'rate'],
+            include: [{
+                model: Address,
+                attributes: ['province'],
+                required: true
+            }],
+            where: {
+                name: { [Op.like]: '%' + req.params.name + '%' }
+            },
+        })
+        if (users) {
+            res.send(users)
+        } else {
+            res.sendStatus(404)
+        }
+    })
 
     return router
 }
