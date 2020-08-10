@@ -111,9 +111,9 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
     })
 
     // select information of accountUser (select name , img_url , id , trạng thái)
-    router.get('/userInformation' , async (req,res) =>{
+    router.get('/userInformation', async (req, res) => {
         const users = await User.findAll({
-            attributes: ['id' , 'name' , 'img_url' , 'user_status'],  
+            attributes: ['id', 'name', 'img_url', 'user_status'],
         })
         if (users) {
             res.send(users)
@@ -123,9 +123,9 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
     })
 
     // select information of accountAdmin (select name , img_url , id , trạng thái)
-    router.get('/adminInformation' , async (req,res) =>{
+    router.get('/adminInformation', async (req, res) => {
         const admins = await Admin.findAll({
-            attributes: ['id' , 'name' , 'department'],  
+            attributes: ['id', 'name', 'department'],
         })
         if (admins) {
             res.send(admins)
@@ -206,6 +206,20 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
                     error: error
                 })
             })
+    })
+
+    // create collection in collection_auction
+    router.post('/setCollection', async (req, res) => {
+        const collections = await collection_auction.create(
+            {
+                collection_id: req.body.collection_id,
+                auction_id: req.body.auction_id
+            })
+        if (collections) {
+            res.send(collections)
+        } else {
+            res.sendStatus(error)
+        }
     })
 
     return router
