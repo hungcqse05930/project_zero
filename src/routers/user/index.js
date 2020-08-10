@@ -99,8 +99,18 @@ const createUserRouter = ({ User, Product, Address }) => {
 
     // === AFTER LOGIN ===
     // user - get info
-    router.get('/info/', auth, async (req, res, next) => {
+    router.get('/info/id/:id', async (req, res, next) => {
+        const user = await User.findOne({
+            attributes: ['phone', 'name', 'gender', 'dob', 'img_url', 'rate', 
+            [Sequelize.fn('timestampdiff', 'month', Sequelize.literal('CURRENT_TIMESTAMP'), Sequelize.col('date_created')), 'membership']],
+            where: { id: req.params.id }
+        })
 
+        if(user) {
+            res.send(user)
+        } else {
+            res.sendStatus(404)
+        }
     })
 
     // get user_name by user_id from (product) 

@@ -24,7 +24,7 @@ const createCollectionRouter = ({ Collection, CollectionAuction, Auction, Produc
     })
 
     // get all auction trong 1 collection
-    router.get('/collectionAuction/:id', async (req, res) => {
+    router.get('/collection/:id', async (req, res) => {
         Product.hasMany(Auction, { foreignKey: 'product_id' })
         Auction.belongsTo(Product, { foreignKey: 'product_id' })
 
