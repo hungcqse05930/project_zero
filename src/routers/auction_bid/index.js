@@ -53,7 +53,8 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
                     model: User,
                     attributes: ['name'],
                     required: false,
-                }]
+                }],
+                limit: 10
             }
         )
         if (autionBid) {

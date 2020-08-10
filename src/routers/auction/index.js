@@ -196,7 +196,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
             }, {
                 model: Auction,
                 where: { id: req.params.id },
-                attributes: ['date_created', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],],
+                attributes: ['price_cur', 'date_created', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],],
                 required: true,
             }, {
                 model: Address,
