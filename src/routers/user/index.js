@@ -139,6 +139,21 @@ const createUserRouter = ({ User, Product, Address }) => {
         }
     })
 
+    // get phone name dob gender
+    router.get('/info/profile/:id', async (req, res) => {
+        // find by primary key = find by id
+        const user = await User.findOne(
+            {
+                attributes: ['name','phone','name' ,'dob','gender'],
+                where: { id: req.params.id }
+            })
+        if (user) {
+            res.send(user)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
     // get user_name , rating , avatar_url
     router.get('/product/:id', async (req, res) => {
         // find by primary key = find by id
