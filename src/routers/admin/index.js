@@ -7,13 +7,13 @@ const sequelize = require('sequelize')
 
 
 
-const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }) => {
+const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User ,ProductMedia }) => {
     const router = express.Router()
 
     // Review post by id
     router.get('/:id', async (req, res) => {
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
-        Fruit.hasMany(Product , { foreignKey: 'fruit_id' })
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
         const products = await Product.findAll({
             where: { id: req.params.id },
             distinct: true,
@@ -30,7 +30,7 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }
     })
 
     //Review post
-    router.post('/', async (req, res) => {
+    router.post('/reviewProduct', async (req, res) => {
         const products = {
             product_id: req.body.product_id,
             admin_id: req.body.admin_id,
@@ -53,6 +53,24 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }
             })
     })
 
+    //Review produc_media
+    router.put('/reviewMedia', async (req, res) => {
+        const productMedias = await ProductMedia.update(
+            {
+                notes: req.body.notes
+            },
+            {
+                where: {
+                    id: req.body.id
+                }
+            })
+        if (productMedias) {
+            res.send(productMedias)
+        } else {
+            res.sendStatus(error)
+        }
+    })
+
     //Screen name: Dashboard - 1
     //Function name: getAllProduct
     //Description: Get all product for displaying
@@ -67,18 +85,18 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User }
 
         const products = await Product.findAll({
             distinct: true,
-            attributes:['fruit_id','title','date_created','product_status'],
+            attributes: ['id', 'title', 'date_created', 'product_status'],
             include: [{
-                model:  Fruit,
+                model: Fruit,
                 required: true,
-                attributes:['title']
-            },{
-                model:  User,
+                attributes: ['title']
+            }, {
+                model: User,
                 required: true,
-                attributes:['name']
+                attributes: ['name']
             }]
         })
-        
+
         if (products) {
             res.send(products)
         } else {
