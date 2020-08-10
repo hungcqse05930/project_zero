@@ -1,16 +1,26 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const { Sequelize,Op } = require('sequelize');
-const timediff = require('timediff');
+const { Sequelize, Op } = require('sequelize');
+// const timediff = require('timediff');
 
 const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fruit }) => {
     const router = express.Router()
 
-    // APPROVED
-    // get product by id
-    router.get('/id/:id', async (req, res) => {
-        // find by primary key = find by id
-        const product = await Product.findByPk(req.params.id)
+    // pending
+    // get product , product_meida by id
+    router.get('/:id', async (req, res) => {
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        const product = await Product.findOne({
+            where: { id: req.params.id, },
+            include: [{
+                model: ProductMedia,
+                attributes: ['media_url'],
+                required: true,
+            }]
+        }
+        )
         if (product) {
             res.send(product)
         } else {
@@ -138,12 +148,12 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
 
         const products = await Product.findAll({
-            attributes: ['title', 'id', 'price_cur'], 
+            attributes: ['title', 'id', 'price_cur', 'weight'], 
             limit: 10,
             include: [{
                 model: Auction,
-                attributes: ['views' , [Sequelize.fn(timediff, Sequelize.col('date_created', Sequelize.literal('CURRENT_TIMESTAMP'))) , 'remain' ]],
-                order: ['views', 'DESC'],
+                attributes: ['views' , [Sequelize.fn('datediff', Sequelize.col('Auctions.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')) , 'remain' ]],
+                order: [['Auction.remain', 'ASC']],
                 required: true,
             },
             {
@@ -164,7 +174,91 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         }
     })
 
-    //deleteProductById
+    // select all product by fruit_id
+    router.get('/fruit/:id', async (req, res) => {
+
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+        // offset: number of records you skip
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 5
+
+        const fruit = await Fruit.findAll({
+            where: { id: req.params.id },
+            include: [{
+                model: Product,
+                required: true,
+            }]
+        })
+
+        if (fruit) {
+            res.send(fruit)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+
+    // delete Product where product_id = ?
+    router.delete('/delete/:id', async (req, res) => {
+        const product = await Product.destroy(
+            {
+                where: {
+                    id: req.params.id
+                }
+            })
+            .then(function (rowsDeleted) {
+                if (rowsDeleted == 0) {
+                    res.status(404).json({
+                        "error": "no todo found with that id"
+                    });
+                } else {
+                    res.status(204).send();
+                }
+            }).catch(function (e) {
+                res.status(500).json(e);
+            });
+    })
+
+    // select product với titleP , titleF , username,status_product  where product_id = ?
+    router.get('/dashboard/:id', async (req, res) => {
+
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+
+        // offset: number of records you skip
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 5
+
+        const fruit = await Fruit.findAll({
+            where: { id: req.params.id },
+            attributes: ['title'],
+            include: [{
+                model: Product,
+                attributes: ['title', 'product_status'],
+                required: true,
+                include: [
+                    {
+                        model: User,
+                        attributes: ['name'],
+                        required: true,
+                    }]
+            }]
+        })
+
+        if (fruit) {
+            res.send(fruit)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
 
     return router
 }

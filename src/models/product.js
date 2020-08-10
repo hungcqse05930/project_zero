@@ -49,6 +49,9 @@ const createProductModel = (sequelize) => {
         price_cur: {
             type: DataTypes.DOUBLE
         },
+        notes: {
+            type: DataTypes.TEXT
+        },
         product_status: {
             type: DataTypes.TINYINT
         },

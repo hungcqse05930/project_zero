@@ -25,7 +25,7 @@ const createFruitRouter = ({ Fruit }) => {
         // offset: number of records you skip
         const offset = Number.parseInt(req.query.offset) || 0
         // limit: number of records you get
-        const limit = Number.parseInt(req.query.limit) || 10
+        const limit = Number.parseInt(req.query.limit) || 20
 
         const fruit = await Fruit.findAll({ attributes: ['title'], offset, limit })
 
@@ -37,7 +37,7 @@ const createFruitRouter = ({ Fruit }) => {
     })
 
     // Insert Fruit
-    router.post('/', async (req, res) => {
+    router.post('/insert', async (req, res) => {
         const fruit = {
             title: req.body.title,
             icon_url: req.body.icon_url
@@ -50,6 +50,47 @@ const createFruitRouter = ({ Fruit }) => {
                     message: err.message
                 })
             })
+    })
+
+    // update Fruit where fruit_id = ?
+    router.put('/update/:id', async (req, res) => {
+        const fruit = await Fruit.update(
+            {
+                title: req.body.title,
+                icon_url: req.body.icon_url
+            },
+            {
+                where: {
+                    id: req.params.id
+                }
+            })
+            .then(data => res.send(data))
+            .catch(err => {
+                res.status(500).send({
+                    message: err.message
+                })
+            })
+    })
+
+    // delete Fruit where fruit_id = ?
+    router.delete('/delete/:id', async (req, res) => {
+        const fruit = await Fruit.destroy(
+            {
+                where: {
+                    id: req.params.id
+                }
+            })
+            .then(function (rowsDeleted) {
+                if (rowsDeleted == 0) {
+                    res.status(404).json({
+                        "error": "no todo found with that id"
+                    });
+                } else {
+                    res.status(204).send();
+                }
+            }).catch(function (e) {
+                res.status(500).json(e);
+            });
     })
 
     return router
