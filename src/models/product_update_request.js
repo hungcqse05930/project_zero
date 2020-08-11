@@ -20,25 +20,25 @@ const createProductUpdateRequestModel = (sequelize) => {
             type: DataTypes.STRING
         },
         weight: {
-            type: DataTypes.DOUBLE
+            type: DataTypes.STRING
         },
         fruit_pct: {
-            type: DataTypes.FLOAT
+            type: DataTypes.STRING
         },
         sugar_pct: {
-            type: DataTypes.FLOAT
+            type: DataTypes.STRING
         },
         weight_avg: {
-            type: DataTypes.FLOAT
+            type: DataTypes.STRING
         },
         diameter_avg: {
-            type: DataTypes.FLOAT
+            type: DataTypes.STRING
         },
         price_init: {
-            type: DataTypes.DOUBLE
+            type: DataTypes.STRING
         },
         price_step: {
-            type: DataTypes.DOUBLE
+            type: DataTypes.STRING
         },
         notes: {
             type: DataTypes.STRING
