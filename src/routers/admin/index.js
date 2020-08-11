@@ -10,11 +10,12 @@ const uniqid = require('uniqid')
 // middlewares
 const auth = require('../../middlewares/auth')
 const collection_auction = require('../../models/collection_auction')
+const address = require('../address')
 // middleware
 
 
 
-const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, ProductMedia,Collection, CollectionAuction }) => {
+const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, ProductMedia,Collection, CollectionAuction , Address }) => {
     const router = express.Router()
 
     // Review post by id
@@ -26,6 +27,33 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
             distinct: true,
             include: [{
                 model: Fruit,
+                required: true
+            }]
+        })
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // Review post by id bổ sung address
+    router.get('/Product/:id', async (req, res) => {
+
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })       
+
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        const products = await Product.findAll({
+            where: { id: req.params.id },
+            distinct: true,
+            include: [{
+                model: Fruit,
+                required: true
+            },{
+                model: Address,
+                attributes: ['province'],
                 required: true
             }]
         })
