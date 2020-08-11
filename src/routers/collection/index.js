@@ -22,9 +22,43 @@ const createCollectionRouter = ({ Collection, CollectionAuction, Auction, Produc
             res.sendStatus(404)
         }
     })
+    
+    const Company_Product_Person = sequelize.define("company_product_person", {
+        id: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        companyProductId: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: {
+                model: "company_product",
+                key: "id"
+            },
+            onDelete: "CASCADE"
+        },
+        personId: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: {
+                model: "person",
+                key: "id"
+            },
+            onDelete: "CASCADE"
+        },
+        thoughts: Sequelize.STRING
+    });
 
     // get all auction trong 1 collection
     router.get('/collection/:id', async (req, res) => {
+        Collection.belongsToMany(Auction, { through: CollectionAuction , foreignKey: 'collection_id' })
+        Auction.belongsToMany(Collection, { through: CollectionAuction , foreignKey: 'auction_id' })
+
+        CollectionAuction.hasMany(Auction, { foreignKey: 'auction_id' })
+        Auction.belongsTo(CollectionAuction, {  foreignKey: 'auction_id' })
+        
         Product.hasMany(Auction, { foreignKey: 'product_id' })
         Auction.belongsTo(Product, { foreignKey: 'product_id' })
 
@@ -36,40 +70,13 @@ const createCollectionRouter = ({ Collection, CollectionAuction, Auction, Produc
 
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
-
-        Auction.hasMany(CollectionAuction, { foreignKey: 'auction_id' })
-        CollectionAuction.belongsTo(Auction, { foreignKey: 'auction_id' })
-
-        Collection.hasMany(CollectionAuction, { foreignKey: 'collection_id' })
-        CollectionAuction.belongsTo(Collection, { foreignKey: 'collection_id' })
-
-        Collection.belongsToMany(Auction, { through: CollectionAuction })
-        Auction.belongsToMany(Collection, { through: CollectionAuction })
-
+        
         const products = await CollectionAuction.findAll({
-            limit: 20,
-            where: { collection_id: req.params.id },
-            include: [{
+            where: {collection_id:req.params.id},
+            attributes: ['auction_id'],
+            include:[{
                 model: Auction,
-                attributes: ['id', 'price_cur', 'views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
-                where: { auction_status: 1 },
-                required: true,
-                include: [{
-                    model: Product,
-                    attributes: ['title', 'id', 'weight', 'fruit_id'],
-                    required: true,
-                    include: [
-                        {
-                            model: Address,
-                            attributes: ['province'],
-                            required: true
-                        },
-                        {
-                            model: ProductMedia,
-                            attributes: ['media_url'],
-                            required: true
-                        }]
-                }]
+                require: true
             }]
         })
         if (products) {
