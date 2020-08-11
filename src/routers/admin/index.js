@@ -39,6 +39,7 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
     //Review post
     router.post('/reviewProduct', async (req, res) => {
         const products = {
+            fruit_title: req.body.fruit_title,
             product_id: req.body.product_id,
             admin_id: req.body.admin_id,
             title: req.body.title,
