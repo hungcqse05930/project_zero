@@ -15,7 +15,7 @@ const address = require('../address')
 
 
 
-const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, ProductMedia,Collection, CollectionAuction , Address }) => {
+const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address }) => {
     const router = express.Router()
 
     // Review post by id
@@ -37,11 +37,52 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
         }
     })
 
+    // Review post by id co media
+    router.get('/review/:id', async (req, res) => {
+
+        // address 1 - n product
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        // product 1 - n product_media
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+
+        const products = await Product.findAll({
+            attributes: ['title', 'id', 'price_cur', 'weight'],
+            limit: 1,
+            where: { id: req.params.id },
+            include: [
+                {
+                    model: Address,
+                    attributes: ['province'],
+                    required: true
+                },
+                {
+                    model: ProductMedia,
+                    attributes: ['media_url'],
+                    required: true
+                }, {
+                    model: Fruit,
+                    required: true
+                }
+            ]
+        })
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
     // Review post by id bổ sung address
     router.get('/Product/:id', async (req, res) => {
 
         Address.hasMany(Product, { foreignKey: 'address_id' })
-        Product.belongsTo(Address, { foreignKey: 'address_id' })       
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
 
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
@@ -51,7 +92,7 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
             include: [{
                 model: Fruit,
                 required: true
-            },{
+            }, {
                 model: Address,
                 attributes: ['province'],
                 required: true
