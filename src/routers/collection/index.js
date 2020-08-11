@@ -79,6 +79,109 @@ const createCollectionRouter = ({ Collection, CollectionAuction, Auction, Produc
         }
     })
 
+    // get collection
+    router.get('/id/:id', async (req, res) => {
+        // Collection.belongsToMany(Auction, { through: CollectionAuction, foreignKey: 'collection_id' })
+        // Auction.belongsToMany(Collection, { through: CollectionAuction, foreignKey: 'auction_id' })
+
+        Auction.hasMany(CollectionAuction, { foreignKey: 'auction_id' })
+        CollectionAuction.belongsTo(Auction, { foreignKey: 'auction_id' })
+
+        Collection.hasMany(CollectionAuction, { foreignKey: 'collection_id' })
+        CollectionAuction.belongsTo(Collection, { foreignKey: 'collection_id' })
+
+        // product 1 - n auction
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        // address 1 - n product
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        // product 1 - n product_media
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        let collectionId = req.params.id
+
+        const collection = await Collection.findOne({
+            where: {
+                id: collectionId
+            },
+            include: [
+                {
+                    model: CollectionAuction,
+                    attributes: ['auction_id'],
+                    required: true,
+                    include: [
+                        {
+                            model: Auction,
+                            attributes: ['id', 'price_cur', 'views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
+                            required: true,
+                            where: {
+                                id: {
+                                    [Op.eq]: Sequelize.col('CollectionAuctions.auction_id')
+                                }
+                            },
+                            include: [
+                                {
+                                    model: Product,
+                                    attributes: ['id', 'title', 'weight'],
+                                    required: true,
+                                    include: [
+                                        {
+                                            model: Address,
+                                            attributes: ['province'],
+                                            required: true
+                                        },
+                                        {
+                                            model: ProductMedia,
+                                            attributes: ['media_url'],
+                                            // required: true,
+                                            limit: 1
+                                        }]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        })
+
+        // const auctions = await Auction.findAll({
+        //     attributes: ['id', 'price_cur', 'views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
+        //     include: [
+        //         {
+        //             model: Product,
+        //             attributes: ['id', 'title', 'weight'],
+        //             required: true,
+        //             include: [
+        //                 {
+        //                     model: Address,
+        //                     attributes: ['province'],
+        //                     required: true
+        //                 },
+        //                 {
+        //                     model: ProductMedia,
+        //                     attributes: ['media_url'],
+        //                     required: true,
+        //                     limit: 1
+        //                 }]
+        //         },
+        //         {
+        //             model: CollectionAuction,
+        //             attributes: ['id']
+        //         }
+        //     ]
+        // })
+
+        if (collection) {
+            res.status(400).send(collection)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
     return router
 }
 
