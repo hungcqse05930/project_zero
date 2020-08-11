@@ -314,16 +314,17 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         AuctionBid.belongsTo(Auction, { foreignKey: 'auction_id' })
         Auction.hasMany(AuctionBid, { foreignKey: 'bidder_user_id' })
 
-        const auction = await Auction.findAll({
-            where: {
-                auction_status: 1
-            },
-            group: ['id'],
+        const auction = await AuctionBid.findAll({
+            where: { bidder_user_id: req.params.id },
+            //group: ['auction_id'],
             include: [
                 {
-                    model: AuctionBid,
+                    model: Auction,
                     required: true,
-                    where: { bidder_user_id: req.params.id },
+                    where: {
+                        auction_status: 1
+                    },
+                   
                 }],
         })
         if (auction) {
