@@ -139,7 +139,7 @@ const createUserRouter = ({ User, Product, Address }) => {
         }
     })
 
-    // get phone name dob gender
+    // get phone name dob gender (hồ sơ)
     router.get('/info/profile/:id', async (req, res) => {
         // find by primary key = find by id
         const user = await User.findOne(

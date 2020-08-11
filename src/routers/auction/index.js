@@ -307,6 +307,33 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         }
     })
 
+
+    // Lấy các auction đang mở (status = 1) từ user id (:id) mà người dùng ấy đang tham gia đấu giá
+    router.get('/user/:id', async (req, res) => {
+        // find by primary key = find by id
+        AuctionBid.belongsTo(Auction, { foreignKey: 'auction_id' })
+        Auction.hasMany(AuctionBid, { foreignKey: 'bidder_user_id' })
+
+        const auction = await AuctionBid.findAll({
+            where: { bidder_user_id: req.params.id },
+            //group: ['auction_id'],
+            include: [
+                {
+                    model: Auction,
+                    required: true,
+                    where: {
+                        auction_status: 1
+                    },
+                   
+                }],
+        })
+        if (auction) {
+            res.send(auction)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
     return router
 }
 

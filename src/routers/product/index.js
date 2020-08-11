@@ -148,11 +148,11 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
 
         const products = await Product.findAll({
-            attributes: ['title', 'id', 'price_cur', 'weight'], 
+            attributes: ['title', 'id', 'price_cur', 'weight'],
             limit: 10,
             include: [{
                 model: Auction,
-                attributes: ['views' , [Sequelize.fn('datediff', Sequelize.col('Auctions.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')) , 'remain' ]],
+                attributes: ['views', [Sequelize.fn('datediff', Sequelize.col('Auctions.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
                 order: [['Auction.remain', 'ASC']],
                 required: true,
             },
@@ -259,6 +259,31 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         }
     })
 
+    //Lấy các product theo id user (:id) và status (:status)
+    router.get('/user/:id/:status', async (req, res) => {
+
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+
+        // offset: number of records you skip
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 5
+
+        const fruit = await Product.findAll({
+            where:{
+                product_status : req.params.status,
+                user_id : req.params.id
+            },
+            required: true
+        })
+
+        if (fruit) {
+            res.send(fruit)
+        } else {
+            res.sendStatus(404)
+        }
+    })
 
     return router
 }
