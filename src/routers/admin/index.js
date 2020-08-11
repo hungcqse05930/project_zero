@@ -52,18 +52,15 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
 
         const products = await Product.findAll({
-            attributes: ['title', 'id', 'price_cur', 'weight'],
             limit: 1,
             where: { id: req.params.id },
             include: [
                 {
                     model: Address,
-                    attributes: ['province'],
                     required: true
                 },
                 {
                     model: ProductMedia,
-                    attributes: ['media_url'],
                     required: true
                 }, {
                     model: Fruit,
