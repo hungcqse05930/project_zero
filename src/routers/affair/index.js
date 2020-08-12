@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Affair, AffairChat , AffairContract }) => {
+const createAffairRouter = ({ Affair, AffairChat , AffairContract , Product }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -64,6 +64,29 @@ const createAffairRouter = ({ Affair, AffairChat , AffairContract }) => {
             res.send(status)
         }
     })
+
+    // lấy ra tiền đấu giá (tính 10%)
+    router.get('/percentAmount/:id' , async (req,res) =>{
+        Product.hasOne(Affair, {foreignKey: 'id'})
+        Affair.hasOne(Product, {foreignKey: 'product_id'})
+
+        const percentAmount = await Product.findAll({
+            attributes:['price_cur'],
+            include:[{
+                model: Affair,
+                where: {
+                    product_id: req.params.id,
+                },
+                required: true
+            }]
+        })
+        if(percentAmount){
+            res.send(percentAmount)
+        }else{
+            res.send(status)
+        }
+    })
+
 
     return router
 }
