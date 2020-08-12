@@ -14,7 +14,9 @@ const { createIdentityModel } = require('./identity')
 const { createAdminModel } = require('./admin')
 const { createCollectionAuctionModel } = require('./collection_auction')
 const { createCollectionModel } = require('./collection')
-
+const { createAffairModel } = require('./affair')
+const { createAffairChatModel } = require('./affair_chat')
+const { createAffairContractModel } = require('./affair_contract')
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
     // establish a connection
@@ -41,7 +43,10 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         Identity: createIdentityModel(sequelize),
         Admin: createAdminModel(sequelize),
         Collection : createCollectionModel(sequelize),
-        CollectionAuction : createCollectionAuctionModel(sequelize)
+        CollectionAuction : createCollectionAuctionModel(sequelize),
+        Affair : createAffairModel(sequelize),
+        AffairChat : createAffairChatModel (sequelize),
+        AffairContract : createAffairContractModel (sequelize)
     }
 }
 
