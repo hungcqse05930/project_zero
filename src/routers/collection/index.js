@@ -23,34 +23,6 @@ const createCollectionRouter = ({ Collection, CollectionAuction, Auction, Produc
         }
     })
     
-    const Company_Product_Person = sequelize.define("company_product_person", {
-        id: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true
-        },
-        companyProductId: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            references: {
-                model: "company_product",
-                key: "id"
-            },
-            onDelete: "CASCADE"
-        },
-        personId: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            references: {
-                model: "person",
-                key: "id"
-            },
-            onDelete: "CASCADE"
-        },
-        thoughts: Sequelize.STRING
-    });
-
     // get all auction trong 1 collection
     router.get('/collection/:id', async (req, res) => {
         Collection.belongsToMany(Auction, { through: CollectionAuction , foreignKey: 'collection_id' })

@@ -147,7 +147,6 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
     })
 
     // vao auction view + 1
-    // Update update name , DOB , gender vaos bang user
     router.put('/update/:id', async (req, res) => {
 
         let auction = await Auction.findOne({ where: { id: req.params.id } })

@@ -1,6 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const { Sequelize, Op } = require('sequelize');
+const { Sequelize, Op, where } = require('sequelize');
 // const timediff = require('timediff');
 
 const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fruit }) => {
@@ -44,7 +44,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
             price_init: req.body.price_init,
             price_step: req.body.price_step,
             price_cur: req.body.price_cur,
-            product_type: req.body.product_status,
+            product_type: req.body.product_type,
             product_status: req.body.product_status
         }
 
@@ -271,15 +271,84 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         const limit = Number.parseInt(req.query.limit) || 5
 
         const fruit = await Product.findAll({
-            where:{
-                product_status : req.params.status,
-                user_id : req.params.id
+            where: {
+                product_status: req.params.status,
+                user_id: req.params.id
             },
             required: true
         })
 
         if (fruit) {
             res.send(fruit)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // // lấy ra product_status để xem bài viết đã kiểm duyệt chưa chưa thì cho insert new productMedia
+    // router.get('/productStatus/:id', async (req, res) => {
+
+    //     Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+    //     ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+    //     const products = await ProductMedia.findAll({    
+    //             attributes: ['product_id'],
+    //             include: [{
+    //                 model: Product,
+    //                 required: true,
+    //                 where: {id : req.params.id},
+    //                 attributes: ['product_status'],
+    //             }],    
+    //             group: 'product_id'
+    //     })
+    //     if (products) {
+    //         res.send(products)
+    //     } else {
+    //         res.sendStatus(404)
+    //     }
+    // })
+
+    // thêm product_media theo product_id
+    router.post('/productMedia', async (req, res) => {
+        const productMedia = await ProductMedia.create({
+            product_id: req.body.product_id,
+            media_url: req.body.media_url,
+            product_media_status: 0,
+        })
+
+        if (productMedia) {
+            res.send(productMedia)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // sửa product
+    router.put('/changeProduct/:id/:user_id', async (req, res) => {
+        const products = await Product.update(
+            {
+                fruit_id: req.body.fruit_id,
+                address_id: req.body.address_id,
+                title: req.body.title,
+                weight: req.body.weight,
+                fruit_pct: req.body.fruit_pct,
+                sugar_pct: req.body.sugar_pct,
+                weight_avg: req.body.weight_avg,
+                diameter_avg: req.body.diameter_avg,
+                price_init: req.body.price_init,
+                price_step: req.body.price_step,
+                price_cur: req.body.price_cur,
+                product_type: req.body.product_type,
+                product_status: 0
+            },
+            {
+                where: {
+                    user_id:req.params.user_id,
+                    id:req.params.id
+                }
+            })
+        if (products) {
+            res.send(products)
         } else {
             res.sendStatus(404)
         }
