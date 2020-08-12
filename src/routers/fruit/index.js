@@ -29,7 +29,7 @@ const createFruitRouter = ({ Fruit , Product }) => {
         // limit: number of records you get
         const limit = Number.parseInt(req.query.limit) || 20
 
-        const fruit = await Fruit.findAll({ attributes: ['title'], offset, limit })
+        const fruit = await Fruit.findAll({ attributes: ['id', 'title', 'date_created'], offset, limit })
 
         if (fruit) {
             res.send(fruit)
@@ -37,6 +37,7 @@ const createFruitRouter = ({ Fruit , Product }) => {
             res.sendStatus(404)
         }
     })
+
 
     // Insert Fruit
     router.post('/insert', async (req, res) => {
