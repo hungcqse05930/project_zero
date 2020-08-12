@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Affair, AffairChat , AffairContract , Product }) => {
+const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -54,8 +54,10 @@ const createAffairRouter = ({ Affair, AffairChat , AffairContract , Product }) =
             shipment_user_id: req.body.shipment_user_id,
             shipment_date: req.body.shipment_date,
             shipment_late_fee: req.body.shipment_late_fee,
-            payment_late_date: req.body.payment_late_date,
-            preservative_amount: req.body.preservative_amount
+            payment_date: req.body.payment_date,
+            payment_late_fee: req.body.payment_late_fee,
+            preservative_amount: req.body.preservative_amount,
+            change_user_id: req.body.change_user_id
         })
         if (contract) {
             res.send(contract)
@@ -66,13 +68,13 @@ const createAffairRouter = ({ Affair, AffairChat , AffairContract , Product }) =
     })
 
     // lấy ra tiền đấu giá (tính 10%)
-    router.get('/percentAmount/:id' , async (req,res) =>{
-        Product.hasOne(Affair, {foreignKey: 'id'})
-        Affair.hasOne(Product, {foreignKey: 'product_id'})
+    router.get('/percentAmount/:id', async (req, res) => {
+        Product.hasOne(Affair, { foreignKey: 'id' })
+        Affair.hasOne(Product, { foreignKey: 'product_id' })
 
         const percentAmount = await Product.findAll({
-            attributes:['price_cur'],
-            include:[{
+            attributes: ['price_cur'],
+            include: [{
                 model: Affair,
                 where: {
                     product_id: req.params.id,
@@ -80,13 +82,79 @@ const createAffairRouter = ({ Affair, AffairChat , AffairContract , Product }) =
                 required: true
             }]
         })
-        if(percentAmount){
+        if (percentAmount) {
             res.send(percentAmount)
-        }else{
+        } else {
             res.send(status)
         }
     })
 
+    // update affair_contract for bider_user_id
+    router.put('/updateContract/:id', async (req, res) => {
+        const update = await AffairContract.update({
+            shipment_user_id: req.body.shipment_user_id,
+            shipment_date: req.body.shipment_date,
+            shipment_late_fee: req.body.shipment_late_fee,
+            payment_date: req.body.payment_date,
+            payment_late_fee: req.body.payment_late_fee,
+            preservative_amount: req.body.preservative_amount,
+            change_user_id: req.body.change_user_id
+        },
+            {
+                where: {
+                    id: req.params.id
+                }
+            })
+
+        if (update) {
+            res.send(update)
+        } else {
+            res.send(status)
+        }
+    })
+
+    // update affair_contract for user_id
+    router.put('/updateContract/:id', async (req, res) => {
+        const update = await AffairContract.update({
+            shipment_user_id: req.body.shipment_user_id,
+            shipment_date: req.body.shipment_date,
+            shipment_late_fee: req.body.shipment_late_fee,
+            payment_date: req.body.payment_date,
+            payment_late_fee: req.body.payment_late_fee,
+            preservative_amount: req.body.preservative_amount,
+            change_user_id: req.body.change_user_id,
+            contract_status:req.body.contract_status
+        },
+            {
+                where: {
+                    id: req.params.id
+                }
+            })
+
+        if (update) {
+            res.send(update)
+        } else {
+            res.send(status)
+        }
+    })
+
+    // update status for affair admin xài
+    router.put('/adminUpdate/:id', async (req, res) => {
+        const updateStatus = await Affair.update({
+            affair_status:req.body.affair_status
+        },
+            {
+                where: {
+                    id: req.params.id
+                }
+            })
+
+        if (updateStatus) {
+            res.send(updateStatus)
+        } else {
+            res.send(status)
+        }
+    })
 
     return router
 }

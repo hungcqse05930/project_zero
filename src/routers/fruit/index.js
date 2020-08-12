@@ -22,17 +22,36 @@ const createFruitRouter = ({ Fruit , Product }) => {
         }
     })
 
-    // get all Fruit
+    // // get all Fruit
+    // router.get('/', async (req, res) => {
+    //     // offset: number of records you skip
+    //     const offset = Number.parseInt(req.query.offset) || 0
+    //     // limit: number of records you get
+    //     const limit = Number.parseInt(req.query.limit) || 20
+
+    //     const fruit = await Fruit.findAll({ attributes: ['title'], offset, limit })
+
+    //     if (fruit) {
+    //         res.send(fruit)
+    //     } else {
+    //         res.sendStatus(404)
+    //     }
+    // })
+
+    // count all fruit
     router.get('/', async (req, res) => {
-        // offset: number of records you skip
-        const offset = Number.parseInt(req.query.offset) || 0
-        // limit: number of records you get
-        const limit = Number.parseInt(req.query.limit) || 20
+        const fruit = await Fruit.count({
+            where:{
+                id:{
+                    [Op.gt]: 0
+                }
+            }
+        })
 
-        const fruit = await Fruit.findAll({ attributes: ['title'], offset, limit })
-
-        if (fruit) {
-            res.send(fruit)
+        if (typeof fruit == "number") {
+            res.send({
+                times: fruit,
+            })
         } else {
             res.sendStatus(404)
         }
