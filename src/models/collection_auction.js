@@ -5,13 +5,16 @@ const createCollectionAuctionModel = (sequelize) => {
 
     // return class' structure
     return CollectionAuction.init({
+        id:{
+            type: DataTypes.BIGINT,
+            primaryKey:true,
+            autoIncrement:true
+        },
         collection_id: {
             type: DataTypes.BIGINT,
-            primaryKey: true,
         },
         auction_id: {
             type: DataTypes.BIGINT,
-            primaryKey: true,
         }
     }, {
         sequelize,
