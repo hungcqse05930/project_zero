@@ -22,14 +22,20 @@ const createAffairContractModel = (sequelize) => {
         shipment_date: {
             type: DataTypes.DATE
         },
+        payment_late_fee:{
+            type: DataTypes.DOUBLE
+        },
         shipment_late_fee :{
             type: DataTypes.DOUBLE
         },
-        payment_late_date: {
+        payment_date: {
             type: DataTypes.DATE
         },
         preservative_amount: {
             type: DataTypes.DOUBLE
+        },
+        change_user_id:{
+            type: DataTypes.BIGINT
         },
         date_updated: {
             type: 'TIMESTAMP'
