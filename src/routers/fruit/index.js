@@ -9,7 +9,7 @@ const createFruitRouter = ({ Fruit , Product }) => {
     const router = express.Router()
 
     // get titleOfFruit by id
-    router.get('/:id', async (req, res) => {
+    router.get('/id/:id', async (req, res) => {
         // find by primary key = find by id
         const fruit = await Fruit.findOne({
             attributes: ['title'],
@@ -22,24 +22,24 @@ const createFruitRouter = ({ Fruit , Product }) => {
         }
     })
 
-    // // get all Fruit
-    // router.get('/', async (req, res) => {
-    //     // offset: number of records you skip
-    //     const offset = Number.parseInt(req.query.offset) || 0
-    //     // limit: number of records you get
-    //     const limit = Number.parseInt(req.query.limit) || 20
+    // get all Fruit
+    router.get('/all', async (req, res) => {
+        // offset: number of records you skip
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 20
 
-    //     const fruit = await Fruit.findAll({ attributes: ['title'], offset, limit })
+        const fruit = await Fruit.findAll({ attributes: ['title'], offset, limit })
 
-    //     if (fruit) {
-    //         res.send(fruit)
-    //     } else {
-    //         res.sendStatus(404)
-    //     }
-    // })
+        if (fruit) {
+            res.send(fruit)
+        } else {
+            res.sendStatus(404)
+        }
+    })
 
     // count all fruit
-    router.get('/', async (req, res) => {
+    router.get('/count', async (req, res) => {
         const fruit = await Fruit.count({
             where:{
                 id:{
