@@ -1,0 +1,2 @@
+SELECT `Fruit`.* FROM
+(SELECT `Fruit`.`id`, `Fruit`.`title`, `Fruit`.`icon_url`, `Fruit`.`date_created`, COUNT(`Products`.`fruit_id`) AS `product_count` FROM `fruit` AS `Fruit` GROUP BY `product_count` LIMIT 0, 20) AS `Fruit` LEFT OUTER JOIN `product` AS `Products` ON `Fruit`.`id` = `Products`.`fruit_id`

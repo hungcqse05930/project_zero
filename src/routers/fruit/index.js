@@ -5,7 +5,7 @@ const { Sequelize, Op, QueryTypes } = require('sequelize')
 const product = require('../product')
 
 
-const createFruitRouter = ({ Fruit , Product }) => {
+const createFruitRouter = ({ Fruit, Product }) => {
     const router = express.Router()
 
     // get titleOfFruit by id
@@ -24,15 +24,34 @@ const createFruitRouter = ({ Fruit , Product }) => {
 
     // get all Fruit
     router.get('/', async (req, res) => {
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
         // offset: number of records you skip
         const offset = Number.parseInt(req.query.offset) || 0
         // limit: number of records you get
         const limit = Number.parseInt(req.query.limit) || 20
 
-        const fruit = await Fruit.findAll({ offset, limit })
+        const fruits = await Fruit.findAll({
+            attributes: {
+                include: [
+                    [
+                        Sequelize.literal(`(
+                            SELECT COUNT(*)
+                            FROM product
+                            WHERE
+                            product.fruit_id = Fruit.id
+                        )`),
+                        'product_count'
+                    ]
+                ]
+            },
+            offset,
+            limit
+        })
 
-        if (fruit) {
-            res.send(fruit)
+        if (fruits) {
+            res.send(fruits)
         } else {
             res.sendStatus(404)
         }
@@ -41,8 +60,8 @@ const createFruitRouter = ({ Fruit , Product }) => {
     // count all fruit
     router.get('/countAll', async (req, res) => {
         const fruit = await Fruit.count({
-            where:{
-                id:{
+            where: {
+                id: {
                     [Op.gt]: 0
                 }
             }
@@ -138,7 +157,7 @@ const createFruitRouter = ({ Fruit , Product }) => {
     // đếm số product mà đang bán loại quả này
     router.get('/count/:id', async (req, res) => {
         const fruit = await Product.count({
-            where:{
+            where: {
                 fruit_id: req.params.id
             }
         })
