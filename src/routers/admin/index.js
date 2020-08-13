@@ -128,7 +128,7 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
     })
 
     //Review produc_media
-    router.put('/reviewMedia', async (req, res) => {
+    router.post('/reviewMedia', async (req, res) => {
         const productMedias = await ProductMedia.update(
             {
                 notes: req.body.notes
@@ -139,7 +139,8 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
                 }
             })
         if (productMedias) {
-            res.send(productMedias)
+            // console.log('success update productMedias')
+            // res.send(productMedias)
         } else {
             res.sendStatus(error)
         }

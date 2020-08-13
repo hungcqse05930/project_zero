@@ -1,9 +1,11 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const auth = require('../../middlewares/auth')
+const { Sequelize, Op, QueryTypes } = require('sequelize')
+const product = require('../product')
 
 
-const createFruitRouter = ({ Fruit }) => {
+const createFruitRouter = ({ Fruit , Product }) => {
     const router = express.Router()
 
     // get titleOfFruit by id
@@ -20,17 +22,36 @@ const createFruitRouter = ({ Fruit }) => {
         }
     })
 
-    // get all Fruit
+    // // get all Fruit
+    // router.get('/', async (req, res) => {
+    //     // offset: number of records you skip
+    //     const offset = Number.parseInt(req.query.offset) || 0
+    //     // limit: number of records you get
+    //     const limit = Number.parseInt(req.query.limit) || 20
+
+    //     const fruit = await Fruit.findAll({ attributes: ['title'], offset, limit })
+
+    //     if (fruit) {
+    //         res.send(fruit)
+    //     } else {
+    //         res.sendStatus(404)
+    //     }
+    // })
+
+    // count all fruit
     router.get('/', async (req, res) => {
-        // offset: number of records you skip
-        const offset = Number.parseInt(req.query.offset) || 0
-        // limit: number of records you get
-        const limit = Number.parseInt(req.query.limit) || 20
+        const fruit = await Fruit.count({
+            where:{
+                id:{
+                    [Op.gt]: 0
+                }
+            }
+        })
 
-        const fruit = await Fruit.findAll({ attributes: ['title'], offset, limit })
-
-        if (fruit) {
-            res.send(fruit)
+        if (typeof fruit == "number") {
+            res.send({
+                times: fruit,
+            })
         } else {
             res.sendStatus(404)
         }
@@ -72,6 +93,26 @@ const createFruitRouter = ({ Fruit }) => {
             })
     })
 
+    router.get('/search/:title', async (req, res) => {
+        // offset: number of records you skip
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 20
+
+        const fruit = await Fruit.findAll({
+            where: {
+                title: { [Op.like]: '%' + req.params.title + '%' }
+            },
+            offset, limit
+        })
+
+        if (fruit) {
+            res.send(fruit)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
     // delete Fruit where fruit_id = ?
     router.delete('/delete/:id', async (req, res) => {
         const fruit = await Fruit.destroy(
@@ -91,6 +132,23 @@ const createFruitRouter = ({ Fruit }) => {
             }).catch(function (e) {
                 res.status(500).json(e);
             });
+    })
+
+    // đếm số product mà đang bán loại quả này
+    router.get('/count/:id', async (req, res) => {
+        const fruit = await Product.count({
+            where:{
+                fruit_id: req.params.id
+            }
+        })
+
+        if (typeof fruit == "number") {
+            res.send({
+                times: fruit,
+            })
+        } else {
+            res.sendStatus(404)
+        }
     })
 
     return router

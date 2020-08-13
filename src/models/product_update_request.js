@@ -16,6 +16,9 @@ const createProductUpdateRequestModel = (sequelize) => {
         admin_id: {
             type: DataTypes.BIGINT
         },
+        fruit_title:{
+            type: DataTypes.STRING
+        },
         title: {
             type: DataTypes.STRING
         },
