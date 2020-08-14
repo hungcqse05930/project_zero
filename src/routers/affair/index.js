@@ -72,7 +72,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product }) => 
         Product.hasOne(Affair, { foreignKey: 'id' })
         Affair.hasOne(Product, { foreignKey: 'product_id' })
 
-        const percentAmount = await Product.findAll({
+        const percentAmount = await Product.findOne({
             attributes: ['price_cur'],
             include: [{
                 model: Affair,
@@ -82,10 +82,14 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product }) => 
                 required: true
             }]
         })
-        if (percentAmount) {
-            res.send(percentAmount)
+        const tenPercent = Number.parseFloat(percentAmount.price_cur) * 0.1
+
+        if (percentAmount !== null) {
+            res.send({
+                amount: tenPercent
+            })
         } else {
-            res.send(status)
+            res.send(404)
         }
     })
 

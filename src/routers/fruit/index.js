@@ -46,8 +46,9 @@ const createFruitRouter = ({ Fruit, Product }) => {
                     ]
                 ]
             },
-            offset,
-            limit
+            order: [['date_created', 'DESC']]
+            // offset,
+            // limit
         })
 
         if (fruits) {
@@ -58,7 +59,7 @@ const createFruitRouter = ({ Fruit, Product }) => {
     })
 
     // count all fruit
-    router.get('/countAll', async (req, res) => {
+    router.get('/count', async (req, res) => {
         const fruit = await Fruit.count({
             where: {
                 id: {
@@ -78,7 +79,7 @@ const createFruitRouter = ({ Fruit, Product }) => {
 
 
     // Insert Fruit
-    router.post('/insert', async (req, res) => {
+    router.post('/', async (req, res) => {
         const fruit = {
             title: req.body.title,
             icon_url: req.body.icon_url
@@ -94,7 +95,7 @@ const createFruitRouter = ({ Fruit, Product }) => {
     })
 
     // update Fruit where fruit_id = ?
-    router.put('/update/:id', async (req, res) => {
+    router.put('/', async (req, res) => {
         const fruit = await Fruit.update(
             {
                 title: req.body.title,
@@ -102,7 +103,7 @@ const createFruitRouter = ({ Fruit, Product }) => {
             },
             {
                 where: {
-                    id: req.params.id
+                    id: req.body.id
                 }
             })
             .then(data => res.send(data))
@@ -134,7 +135,7 @@ const createFruitRouter = ({ Fruit, Product }) => {
     })
 
     // delete Fruit where fruit_id = ?
-    router.delete('/delete/:id', async (req, res) => {
+    router.delete('/:id', async (req, res) => {
         const fruit = await Fruit.destroy(
             {
                 where: {
@@ -147,7 +148,9 @@ const createFruitRouter = ({ Fruit, Product }) => {
                         "error": "no todo found with that id"
                     });
                 } else {
-                    res.status(204).send();
+                    res.status(204).send({
+                        message: "Succeeded"
+                    });
                 }
             }).catch(function (e) {
                 res.status(500).json(e);
