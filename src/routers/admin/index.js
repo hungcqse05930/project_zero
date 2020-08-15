@@ -11,11 +11,12 @@ const uniqid = require('uniqid')
 const auth = require('../../middlewares/auth')
 const collection_auction = require('../../models/collection_auction')
 const address = require('../address')
+const { Sequelize } = require('sequelize')
 // middleware
 
 
 
-const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address }) => {
+const createAdminRouter = ({ Admin, Auction, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address }) => {
     const router = express.Router()
 
     // Review post by id
@@ -37,9 +38,63 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
         }
     })
 
+    // Get all products for admin
+    router.get('/product/', async (req, res) => {
+        // user 1 - n product
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+
+        // fruit 1 - n product
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+        // product 1 - nproductmedia
+        // Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        // ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        // product 1 - n address
+        // Address.hasMany(Product, { foreignKey: 'address_id' })
+        // Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        const products = await Product.findAll({
+            attributes: [
+                'id',
+                'title',
+                'product_status',
+                'date_created',
+                [Sequelize.literal('Fruit.title'), 'fruit_title'],
+                [Sequelize.literal('User.name'), 'user_name']
+            ],
+            include: [
+                {
+                    model: Fruit,
+                    attributes: [
+
+                    ],
+                    // required: true
+                },
+                {
+                    model: User,
+                    attributes: [
+                        // 'name'
+                    ],
+                    required: true
+                },
+            ],
+            order: [
+                ['date_created', 'DESC']
+            ]
+        })
+
+        if (products) {
+            res.send(products)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
     // Review post by id co media
     router.get('/review/:id', async (req, res) => {
-
         // address 1 - n product
         Address.hasMany(Product, { foreignKey: 'address_id' })
         Product.belongsTo(Address, { foreignKey: 'address_id' })
@@ -51,28 +106,28 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
 
-        const products = await Product.findAll({
-            limit: 1,
+        const product = await Product.findOne({
             where: { id: req.params.id },
             include: [
                 {
                     model: Address,
-                    required: true
+                    // required: true
                 },
                 {
                     model: ProductMedia,
-                    required: true
+                    // required: true
                 }, {
                     model: Fruit,
-                    required: true
+                    // required: true
                 }
             ]
         })
-        if (products) {
-            res.send(products)
-        } else {
-            res.sendStatus(404)
-        }
+
+        // if (product) {
+        res.send(product)
+        // } else {
+        // res.sendStatus(404)
+        // }
     })
 
     // Review post by id bổ sung address
@@ -83,6 +138,7 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
 
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+
         const products = await Product.findAll({
             where: { id: req.params.id },
             distinct: true,
@@ -104,9 +160,9 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
 
     //Review post
     router.post('/reviewProduct', async (req, res) => {
-        const products = {
-            fruit_title: req.body.fruit_title,
+        const review = {
             product_id: req.body.product_id,
+            fruit_title: req.body.fruit_title,
             admin_id: req.body.admin_id,
             title: req.body.title,
             weight: req.body.weight,
@@ -118,8 +174,13 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
             price_step: req.body.price_step,
             notes: req.body.notes,
         }
-        await ProductUpdateRequest.create(products)
-            .then(data => res.send(data))
+
+        await ProductUpdateRequest.create(review)
+            .then(response => {
+                res.status(200).send({
+                    message: 'Kiểm duyệt thành công.'
+                })
+            })
             .catch(err => {
                 res.status(500).send({
                     message: err.message
@@ -131,7 +192,8 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
     router.post('/reviewMedia', async (req, res) => {
         const productMedias = await ProductMedia.update(
             {
-                notes: req.body.notes
+                notes: req.body.notes || null,
+                product_media_status: req.body.notes === null ? 2 : 0
             },
             {
                 where: {
@@ -308,6 +370,35 @@ const createAdminRouter = ({ Admin, Product, Fruit, ProductUpdateRequest, User, 
                     message: err.message
                 })
             })
+    })
+
+    // AUCTION DASHBOARD
+    // all auctions on dashboard
+    router.get('/auction', async (req, res) => {
+        // product 1 - n auction
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        const auctions = await Auction.findAll({
+            attributes: [
+                'id',
+                'price_cur',
+                'date_closure',
+                'auction_status',
+                [Sequelize.literal('Product.title'), 'product_title'],
+            ],
+            include: [{
+                model: Product,
+                attributes: []
+            }],
+            order: [['date_created', 'DESC']]
+        })
+
+        if(auctions) {
+            res.status(200).send(auctions)
+        } else {
+            res.status(404).send()
+        }
     })
 
     return router

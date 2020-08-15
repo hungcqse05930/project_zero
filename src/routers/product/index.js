@@ -202,8 +202,8 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
 
 
     // delete Product where product_id = ?
-    router.delete('/delete/:id', async (req, res) => {
-        const product = await Product.destroy(
+    router.delete('/:id', async (req, res) => {
+        await Product.destroy(
             {
                 where: {
                     id: req.params.id
@@ -215,10 +215,12 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
                         "error": "no todo found with that id"
                     });
                 } else {
-                    res.status(204).send();
+                    res.status(204).json({
+                        "message": "succeeded"
+                    });
                 }
-            }).catch(function (e) {
-                res.status(500).json(e);
+            }).catch(function (error) {
+                res.status(500).send(error);
             });
     })
 
@@ -324,7 +326,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
     })
 
     // sửa product
-    router.put('/changeProduct/:id/:user_id', async (req, res) => {
+    router.put('/changeProduct/:id', async (req, res) => {
         const products = await Product.update(
             {
                 fruit_id: req.body.fruit_id,
@@ -343,8 +345,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
             },
             {
                 where: {
-                    user_id:req.params.user_id,
-                    id:req.params.id
+                    id: req.params.id
                 }
             })
         if (products) {
@@ -352,6 +353,21 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         } else {
             res.sendStatus(404)
         }
+    })
+
+    router.put('/changeStatus', async (req, res) => {
+        await Product.update(
+            {
+                product_status: req.body.product_status
+            },
+            {
+                where: {
+                    id: req.body.id,
+                }
+            }
+        ).then(response => {
+
+        })
     })
 
     return router
