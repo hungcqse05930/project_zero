@@ -394,10 +394,34 @@ const createAdminRouter = ({ Admin, Auction, Product, Fruit, ProductUpdateReques
             order: [['date_created', 'DESC']]
         })
 
-        if(auctions) {
+        if (auctions) {
             res.status(200).send(auctions)
         } else {
             res.status(404).send()
+        }
+    })
+
+    // edit auction status
+    router.put('/auction/:id', async (req, res) => {
+        const auction = await Auction.update(
+            {
+                auction_status: req.body.auction_status
+            },
+            {
+                where: {
+                    id: req.params.id
+                }
+            }
+        )
+
+        if (auction) {
+            res.send({
+                message: 'Cập nhật trạng thái thành công'
+            })
+        } else {
+            res.sendStatus(500).send({
+                message: 'Yêu cầu không hợp lệ'
+            })
         }
     })
 

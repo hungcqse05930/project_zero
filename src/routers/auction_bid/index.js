@@ -10,8 +10,8 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
     // query đang sai
     router.get('/:id', async (req, res) => {
         // find by primary key = find by id
+        Auction.hasMany(AuctionBid, { foreignKey: 'auction_id' })
         AuctionBid.belongsTo(Auction, { foreignKey: 'auction_id' })
-        Auction.hasMany(AuctionBid, { foreignKey: 'bidder_user_id' })
 
         const auction_bid = await AuctionBid.count({
             where: { bidder_user_id: req.params.id },
@@ -54,7 +54,6 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
                     attributes: ['name'],
                     required: false,
                 }],
-                limit: 10
             }
         )
         if (autionBid) {
@@ -109,16 +108,23 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
             })
             .then(function (rowsDeleted) {
                 if (rowsDeleted == 0) {
-                    res.status(404).json({
-                        "error": "no todo found with that id"
+                    res.status(404).send({
+                        message: 'Bản ghi này không tồn tại trong hệ thống.'
                     });
                 } else {
-                    res.status(204).send();
+                    res.status(204).send({
+                        message: 'Xóa bản ghi thành công.'
+                    });
                 }
             }).catch(function (e) {
-                res.status(500).json(e);
+                res.status(500).send({
+                    message: 'Yêu cầu không hợp lệ.'
+                });
             });
     })
+
+    // get all bids from auction
+    router.get('')
 
     return router
 }

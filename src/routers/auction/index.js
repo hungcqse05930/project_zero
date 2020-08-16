@@ -147,7 +147,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
     })
 
     // vao auction view + 1
-    router.put('/update/:id', async (req, res) => {
+    router.put('/view/:id', async (req, res) => {
 
         let auction = await Auction.findOne({ where: { id: req.params.id } })
         const info = await auction.increment('views', { by: 1 })
@@ -160,7 +160,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
     })
 
     //select all auction wiht product , fruit , user
-    router.get('/:id', async (req, res) => {
+    router.get('/id/:id', async (req, res) => {
 
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
@@ -204,7 +204,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
             }, {
                 model: ProductMedia,
                 attributes: ['media_url'],
-                required: true
+                // required: true
             }]
         })
 
