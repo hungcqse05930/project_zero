@@ -355,6 +355,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         }
     })
 
+    // change status của product khi kiểm duyệt
     router.put('/changeStatus', async (req, res) => {
         await Product.update(
             {

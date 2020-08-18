@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product }) => {
+const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Auction , User }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -19,7 +19,8 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product }) => 
 
         const chat = await AffairChat.findAll({
             where: { affair_id: req.params.id },
-            offset, limit
+            offset, limit,
+
         })
         if (chat) {
             res.send(chat)
@@ -28,6 +29,43 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product }) => 
             res.send(status)
         }
     })
+
+    // Lấy các affair thuộc user_id 
+    router.get('/getAll/:id', async (req, res) => {
+
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 12
+
+        User.hasMany(Product , {foreignKey:'user_id'})
+        Product.belongsTo(User , {foreignKey: 'user_id'})
+
+        Product.hasMany(Affair, { foreignKey: 'product_id' })
+        Affair.belongsTo(Product, { foreignKey: 'product_id' })
+
+        const affair = await Affair.findAll({
+            offset,limit,
+            include:[{
+                model: Product,
+                attributes : ['id'],
+                required:true,
+                include:[{
+                    model: User,
+                    where:{
+                        id: req.params.id
+                    },
+                    required:true
+                }]
+            }]
+        })
+        if (affair) {
+            res.send(affair)
+        }
+        else {
+            res.send(status)
+        }
+    })
+
 
     // thêm chat mới
     router.post('/addChat', async (req, res) => {
@@ -68,26 +106,52 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product }) => 
     })
 
     // lấy ra tiền đấu giá (tính 10%)
-    router.get('/percentAmount/:id', async (req, res) => {
+    router.get('/percentAmount', async (req, res) => {
         Product.hasOne(Affair, { foreignKey: 'id' })
         Affair.hasOne(Product, { foreignKey: 'product_id' })
 
-        const percentAmount = await Product.findOne({
-            attributes: ['price_cur'],
-            include: [{
-                model: Affair,
-                where: {
-                    product_id: req.params.id,
-                },
-                required: true
-            }]
-        })
-        const tenPercent = Number.parseFloat(percentAmount.price_cur) * 0.1
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
 
-        if (percentAmount !== null) {
-            res.send({
-                amount: tenPercent
-            })
+        Affair.hasOne(AffairContract, { foreignKey: 'id' })
+        AffairContract.belongsTo(Affair, { foreignKey: 'affair_id' })
+
+
+        const percentAmount = await Product.findAll({
+            attributes: ['price_cur'],
+            include: [
+                {
+                    model: Auction,
+                    where: {
+                        price_cur: {
+                            [Op.gt]: Sequelize.col('Product.price_init')
+                        }
+                    },
+                    //required: true
+                }, {
+                    model: Affair,
+                    where: {
+                        product_id: {
+                            [Op.eq]: Sequelize.col('Product.id')
+                        }
+                    },
+                    //required: true,
+                    include: {
+                        model: AffairContract,
+                        where: {
+                            contract_status: 0
+                        },
+                        //required: true
+                    }
+                }],
+                //price_cur : Number.parseFloat(Product.price_cur) * 0.1
+        })
+        
+
+        if (percentAmount) {
+            res.send(
+                percentAmount
+            )
         } else {
             res.send(404)
         }
@@ -127,7 +191,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product }) => 
             payment_late_fee: req.body.payment_late_fee,
             preservative_amount: req.body.preservative_amount,
             change_user_id: req.body.change_user_id,
-            contract_status:req.body.contract_status
+            contract_status: req.body.contract_status
         },
             {
                 where: {
@@ -145,7 +209,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product }) => 
     // update status for affair admin xài
     router.put('/adminUpdate/:id', async (req, res) => {
         const updateStatus = await Affair.update({
-            affair_status:req.body.affair_status
+            affair_status: req.body.affair_status
         },
             {
                 where: {

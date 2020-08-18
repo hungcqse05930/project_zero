@@ -1,14 +1,15 @@
 // library
 const express = require('express')
+const { Sequelize, Op, QueryTypes } = require('sequelize')
 
 // middlewares
 const auth = require('../../middlewares/auth')
 
-const createWalletRouter = ({ Wallet, User }) => {
+const createWalletRouter = ({ Wallet, User, Product, Affair, Auction }) => {
     const router = express.Router()
 
     //get wallet_amount by user_id
-    router.get('/:id', async (req, res) => {
+    router.get('/user/:id', async (req, res) => {
         // find by primary key = find by id
         Wallet.belongsTo(User, { foreignKey: 'user_id' })
         User.hasOne(Wallet)
@@ -26,7 +27,7 @@ const createWalletRouter = ({ Wallet, User }) => {
     })
 
     // update wallet_amount by user_id
-    router.put('/:id', async (req, res) => {
+    router.put('/topUp/:id', async (req, res) => {
         // find by primary key = find by id
         Wallet.belongsTo(User, { foreignKey: 'user_id' })
         User.hasOne(Wallet)
@@ -41,6 +42,7 @@ const createWalletRouter = ({ Wallet, User }) => {
             }
         });
     })
+
 
     return router
 }

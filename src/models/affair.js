@@ -19,9 +19,6 @@ const createAffairModel = (sequelize) => {
         buyer_user_id: {
             type: DataTypes.BIGINT
         },
-        affair_status: {
-            type: DataTypes.TINYINT
-        },
         date_created: {
             type: 'TIMESTAMP'
         }
