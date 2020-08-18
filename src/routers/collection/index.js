@@ -22,41 +22,41 @@ const createCollectionRouter = ({ Collection, CollectionAuction, Auction, Produc
             res.sendStatus(404)
         }
     })
-    
-    // get all auction trong 1 collection
-    router.get('/collection/:id', async (req, res) => {
-        Collection.belongsToMany(Auction, { through: CollectionAuction , foreignKey: 'collection_id' })
-        Auction.belongsToMany(Collection, { through: CollectionAuction , foreignKey: 'auction_id' })
 
-        CollectionAuction.hasMany(Auction, { foreignKey: 'auction_id' })
-        Auction.belongsTo(CollectionAuction, {  foreignKey: 'auction_id' })
-        
-        Product.hasMany(Auction, { foreignKey: 'product_id' })
-        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+    // // get all auction trong 1 collection
+    // router.get('/collection/:id', async (req, res) => {
+    //     Collection.belongsToMany(Auction, { through: CollectionAuction , foreignKey: 'collection_id' })
+    //     Auction.belongsToMany(Collection, { through: CollectionAuction , foreignKey: 'auction_id' })
 
-        Address.hasMany(Product, { foreignKey: 'address_id' })
-        Product.belongsTo(Address, { foreignKey: 'address_id' })
+    //     CollectionAuction.hasMany(Auction, { foreignKey: 'auction_id' })
+    //     Auction.belongsTo(CollectionAuction, {  foreignKey: 'auction_id' })
 
-        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
-        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+    //     Product.hasMany(Auction, { foreignKey: 'product_id' })
+    //     Auction.belongsTo(Product, { foreignKey: 'product_id' })
 
-        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
-        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
-        
-        const products = await CollectionAuction.findAll({
-            where: {collection_id:req.params.id},
-            attributes: ['auction_id'],
-            include:[{
-                model: Auction,
-                require: true
-            }]
-        })
-        if (products) {
-            res.send(products)
-        } else {
-            res.sendStatus(404)
-        }
-    })
+    //     Address.hasMany(Product, { foreignKey: 'address_id' })
+    //     Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+    //     Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+    //     ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+    //     Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+    //     Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+    //     const products = await CollectionAuction.findAll({
+    //         where: {collection_id:req.params.id},
+    //         attributes: ['auction_id'],
+    //         include:[{
+    //             model: Auction,
+    //             require: true
+    //         }]
+    //     })
+    //     if (products) {
+    //         res.send(products)
+    //     } else {
+    //         res.sendStatus(404)
+    //     }
+    // })
 
     // get collection
     router.get('/id/:id', async (req, res) => {
@@ -155,7 +155,7 @@ const createCollectionRouter = ({ Collection, CollectionAuction, Auction, Produc
         // })
 
 
-        
+
         if (collection) {
             res.status(400).send(collection)
         } else {
@@ -233,6 +233,30 @@ const createCollectionRouter = ({ Collection, CollectionAuction, Auction, Produc
         })
         if (collection) {
             res.status(400).send(collection)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // get collections for banners
+    router.get('/home', async (req, res) => {
+        const collections = await Collection.findAll({
+            attributes: [
+                'id',
+                'title',
+                'img_url'
+            ],
+            order: [['date_created', 'DESC']],
+            where: {
+                date_ended: {
+                    [Op.gt]: Sequelize.literal('CURRENT_TIMESTAMP')
+                }
+            },
+            limit: 10
+        })
+
+        if (collections) {
+            res.status(200).send(collections)
         } else {
             res.sendStatus(404)
         }

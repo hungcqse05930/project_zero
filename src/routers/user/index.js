@@ -22,11 +22,10 @@ const createUserRouter = ({ User, Product, Address }) => {
             }
         })
             .then((user) => {
-                console.log(user.id)
                 // wrong phone number
                 if (!user) {
-                    return res.status(401).json({
-                        error: new Error('No such phone number! 🥱')
+                    return res.status(401).send({
+                        message: "Số điện thoại chưa được đăng ký tại semo."
                     })
                 }
 
@@ -34,14 +33,15 @@ const createUserRouter = ({ User, Product, Address }) => {
                 bcrypt.compare(req.body.password, user.password)
                     .then((valid) => {
                         if (!valid) {
-                            return res.status(401).json({
-                                error: new Error('Invalid password. 😑')
+                            return res.status(401).send({
+                                message: "Hãy kiểm tra lại mật khẩu."
                             })
                         }
 
                         // generate token
-                        const token = jwt.sign({ id: user.id },
-                            'RANDOM_TOKEN_SECRET',
+                        const token = jwt.sign(
+                            { id: user.id },
+                            'DIT_ME_FPT',
                             { expiresIn: '24h' })
 
                         res.status(200).json({
@@ -51,7 +51,7 @@ const createUserRouter = ({ User, Product, Address }) => {
                         })
                     })
                     .catch((error) => {
-                        return res.status(500).json({
+                        return res.status(500).send({
                             error: error
                         })
                     })
@@ -105,17 +105,17 @@ const createUserRouter = ({ User, Product, Address }) => {
         Address.belongsTo(User, { foreignKey: 'user_id' })
 
         const user = await User.findOne({
-            attributes: ['phone', 'name', 'gender', 'dob', 'img_url', 'rate', 
-            [Sequelize.fn('timestampdiff', Sequelize.literal('month'), Sequelize.col('User.date_created'), Sequelize.literal('CURRENT_TIMESTAMP')), 'membership']],
+            attributes: ['phone', 'name', 'gender', 'dob', 'img_url', 'rate',
+                [Sequelize.fn('timestampdiff', Sequelize.literal('month'), Sequelize.col('User.date_created'), Sequelize.literal('CURRENT_TIMESTAMP')), 'membership']],
             where: { id: req.params.id },
             include: [{
                 model: Address,
-                require:true,
-                attributes:['province'],
+                require: true,
+                attributes: ['province'],
             }]
         })
 
-        if(user) {
+        if (user) {
             res.send(user)
         } else {
             res.sendStatus(404)
@@ -144,7 +144,7 @@ const createUserRouter = ({ User, Product, Address }) => {
         // find by primary key = find by id
         const user = await User.findOne(
             {
-                attributes: ['name','phone','name' ,'dob','gender'],
+                attributes: ['name', 'phone', 'name', 'dob', 'gender'],
                 where: { id: req.params.id }
             })
         if (user) {

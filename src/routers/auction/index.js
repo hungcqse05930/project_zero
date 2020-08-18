@@ -32,7 +32,9 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
 
     })
 
-    router.get('/latest', async (req, res) => {
+
+    // most viewed
+    router.get('/hottest', async (req, res) => {
         // product 1 - n auction
         Product.hasMany(Auction, { foreignKey: 'product_id' })
         Auction.belongsTo(Product, { foreignKey: 'product_id' })
@@ -68,12 +70,130 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                             model: ProductMedia,
                             attributes: ['media_url'],
                             order: [['date_created', 'DESC']],
-                            // required: true
+                            limit: 1
                         }
                     ],
                     required: true
                 }
             ],
+            where : {
+                auction_status: 1
+            }
+        })
+
+
+        if (auctions) {
+            res.send(auctions)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+    
+    // latest
+    router.get('/latest', async (req, res) => {
+        // product 1 - n auction
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        // address 1 - n product
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        // product 1 - n product_media
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        const auctions = await Auction.findAll({
+            attributes: [
+                'id',
+                [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],
+                'price_cur',
+                'views'
+            ],
+            limit: 30,
+            order: [['date_created', 'DESC']],
+            include: [
+                {
+                    model: Product,
+                    attributes: ['id', 'title', 'weight'],
+                    include: [
+                        {
+                            model: Address,
+                            attributes: ['province'],
+                            required: true
+                        },
+                        {
+                            model: ProductMedia,
+                            attributes: ['media_url'],
+                            order: [['date_created', 'DESC']],
+                            limit: 1
+                        }
+                    ],
+                    required: true
+                }
+            ],
+            where : {
+                auction_status: 1
+            }
+        })
+
+
+        if (auctions) {
+            res.send(auctions)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
+    // ending soon
+    router.get('/closing', async (req, res) => {
+        // product 1 - n auction
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        // address 1 - n product
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        // product 1 - n product_media
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        const auctions = await Auction.findAll({
+            attributes: [
+                'id',
+                [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],
+                'price_cur',
+                'views'
+            ],
+            limit: 30,
+            order: [
+                [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'ASC'],
+                [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'ASC'],
+            ],
+            include: [
+                {
+                    model: Product,
+                    attributes: ['id', 'title', 'weight'],
+                    include: [
+                        {
+                            model: Address,
+                            attributes: ['province'],
+                            required: true
+                        },
+                        {
+                            model: ProductMedia,
+                            attributes: ['media_url'],
+                            order: [['date_created', 'DESC']],
+                            limit: 1
+                        }
+                    ],
+                    required: true
+                }
+            ],
+            where : {
+                auction_status: 1
+            }
         })
 
 
@@ -178,34 +298,35 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
 
         // offset: number of records you skip
-        const offset = Number.parseInt(req.query.offset) || 0
+        // const offset = Number.parseInt(req.query.offset) || 0
         // limit: number of records you get
-        const limit = Number.parseInt(req.query.limit) || 5
+        // const limit = Number.parseInt(req.query.limit) || 5
 
         const fruit = await Product.findOne({
-            include: [{
-                model: Fruit,
-                required: true,
-                attributes: ['id', 'title', 'icon_url'],
-            },
-            {
-                model: User,
-                attributes: ['name', 'id', 'img_url', 'rate'],
-                required: true,
-            }, {
-                model: Auction,
-                where: { id: req.params.id },
-                attributes: ['price_cur', 'date_created', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],],
-                required: true,
-            }, {
-                model: Address,
-                attributes: ['province'],
-                required: true
-            }, {
-                model: ProductMedia,
-                attributes: ['media_url'],
-                // required: true
-            }]
+            include: [
+                {
+                    model: Fruit,
+                    required: true,
+                    attributes: ['id', 'title', 'icon_url'],
+                },
+                {
+                    model: User,
+                    attributes: ['name', 'id', 'img_url', 'rate'],
+                    required: true,
+                }, {
+                    model: Auction,
+                    where: { id: req.params.id },
+                    attributes: ['id', 'price_cur', 'date_created', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'], 'auction_status'],
+                    required: true,
+                }, {
+                    model: Address,
+                    attributes: ['province'],
+                    required: true
+                }, {
+                    model: ProductMedia,
+                    attributes: ['media_url'],
+                    // required: true
+                }]
         })
 
         if (fruit) {
@@ -323,7 +444,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                     where: {
                         auction_status: 1
                     },
-                   
+
                 }],
         })
         if (auction) {

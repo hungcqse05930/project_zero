@@ -49,10 +49,16 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
             {
                 where: { auction_id: req.params.id },
                 order: [['date_created', 'DESC'], ['amount', 'DESC']],
+                attributes: [
+                    'id',
+                    'amount',
+                    'date_created',
+                    [Sequelize.literal('User.name'), 'user_name']
+                ],
                 include: [{
                     model: User,
-                    attributes: ['name'],
-                    required: false,
+                    attributes: [],
+                    required: true,
                 }],
             }
         )
