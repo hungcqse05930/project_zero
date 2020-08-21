@@ -267,6 +267,12 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         User.hasMany(Product, { foreignKey: 'user_id' })
         Product.belongsTo(User, { foreignKey: 'user_id' })
 
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
         // offset: number of records you skip
         const offset = Number.parseInt(req.query.offset) || 0
         // limit: number of records you get
@@ -277,7 +283,19 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
                 product_status: req.params.status,
                 user_id: req.params.id
             },
-            required: true
+            include: [
+                {
+                    model: ProductMedia,
+                    attributes: ['media_url'],
+                    limit: 1
+                },
+                {
+                    model: Address,
+                    attributes: ['province'],
+                    required: true
+                }
+            ]
+            // required: true
         })
 
         if (fruit) {

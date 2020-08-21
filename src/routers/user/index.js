@@ -14,12 +14,44 @@ const createUserRouter = ({ User, Product, Address }) => {
     const router = express.Router()
 
     // === BEFORE LOGIN ===
+    // check existed phone
+    router.get('/existed/:phone', async (req, res) => {
+        const phone = await User.findOne({
+            where: {
+                phone: req.params.phone
+            }
+        })
+
+        if (phone) {
+            res.status(500).json({
+                message: 'Số điện thoại đã được đăng ký tại semo. 🙄'
+            })
+        } else {
+            res.status(200).json({
+                message: 'OK'
+            })
+        }
+    })
+
     // login
     router.post('/login', async (req, res) => {
+
+        User.hasMany(Address, { foreignKey: 'user_id' })
+        Address.belongsTo(User, { foreignKey: 'user_id' })
+
         User.findOne({
             where: {
                 phone: req.body.phone
-            }
+            },
+            include: [{
+                model: Address,
+                require: true,
+                attributes: ['province'],
+                where: {
+                    default_address: 1
+                }
+                // required: true
+            }]
         })
             .then((user) => {
                 // wrong phone number
@@ -46,8 +78,7 @@ const createUserRouter = ({ User, Product, Address }) => {
 
                         res.status(200).json({
                             token: token,
-                            id: user.id,
-                            img_dir: user.img_dir
+                            user: user
                         })
                     })
                     .catch((error) => {
@@ -80,8 +111,7 @@ const createUserRouter = ({ User, Product, Address }) => {
                 // save to the database
                 user.save().then(() => {
                     res.status(201).json({
-                        user_id: user.id,
-                        img_dir: img_dir
+                        message: 'Cảm ơn và chào mừng đã đến với chúng mình. 🥰'
                     })
                 }).catch((error) => {
                     res.status(403).json({
@@ -256,6 +286,47 @@ const createUserRouter = ({ User, Product, Address }) => {
         } else {
             res.sendStatus(404)
         }
+    })
+
+    router.put('/password/:id', async (req, res) => {
+        User.findOne({
+            where: {
+                id: req.params.id
+            }
+        }).then(user => {
+            if (!user) {
+                return res.status(401).send({
+                    message: "Tài khoản không còn tồn tại trên semo. 💀"
+                })
+            }
+
+            // compare password with the existing in DB
+            bcrypt.compare(req.body.password, user.password)
+                .then((valid) => {
+                    if (!valid) {
+                        return res.status(401).send({
+                            message: "Hãy kiểm tra lại mật khẩu hiện tại. 🚫"
+                        })
+                    }
+
+                    bcrypt.hash(req.body.new_password, 10)
+                        .then((hash) => {
+                            user.update({
+                                password: hash
+                            })
+                        })
+                        .then(() => {
+                            res.send({
+                                message: 'Cập nhật mật khẩu thành công'
+                            })
+                        })
+                })
+                .catch((error) => {
+                    return res.status(500).send({
+                        error: error
+                    })
+                })
+        })
     })
 
     return router

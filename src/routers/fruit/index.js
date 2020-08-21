@@ -22,8 +22,38 @@ const createFruitRouter = ({ Fruit, Product }) => {
         }
     })
 
+    // get top fruits
+    router.get('/top', async (req, res) => {
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+        const fruits = await Fruit.findAll({
+            attributes: {
+                include: [
+                    [
+                        Sequelize.literal(`(
+                            SELECT COUNT(*)
+                            FROM product
+                            WHERE
+                            product.fruit_id = Fruit.id
+                        )`),
+                        'product_count'
+                    ]
+                ],
+            },
+            order: [[Sequelize.col('product_count'), 'DESC']],
+            limit: 20,
+        })
+
+        if (fruits) {
+            res.send(fruits)
+        } else {
+            res.sendStatus(404)
+        }
+    })
+
     // get all Fruit
-    router.get('/', async (req, res) => {
+    router.get('/dashboard', async (req, res) => {
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
 

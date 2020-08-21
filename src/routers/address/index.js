@@ -70,7 +70,7 @@ const createAddressRouter = ({ Address }) => {
     })
 
     // update address for exist user
-    router.put('/user/:id', async (req, res) => {
+    router.put('/id/:id', async (req, res) => {
         const user = await Address.update(
             {
                 province: req.body.province,
@@ -80,23 +80,19 @@ const createAddressRouter = ({ Address }) => {
             },
             {
                 where: {
-                    [Op.and]: {
-                        id: req.params.id,
-                        default_address: 0
-
-                    }
-
+                    id: req.params.id,
                 }
             })
+
         if (user) {
             res.send(user)
         } else {
-            res.sendStatus(error)
+            res.sendStatus(500)
         }
     })
 
     //delete address
-    router.delete('/user/:id', async (req, res) => {
+    router.delete('/:id', async (req, res) => {
         const user = await Address.destroy(
             {
                 where: {
