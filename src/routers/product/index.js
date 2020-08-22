@@ -43,9 +43,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
             diameter_avg: req.body.diameter_avg,
             price_init: req.body.price_init,
             price_step: req.body.price_step,
-            price_cur: req.body.price_cur,
             product_type: req.body.product_type,
-            product_status: req.body.product_status
         }
 
         await Product.create(product)
@@ -333,7 +331,6 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         const productMedia = await ProductMedia.create({
             product_id: req.body.product_id,
             media_url: req.body.media_url,
-            product_media_status: 0,
         })
 
         if (productMedia) {

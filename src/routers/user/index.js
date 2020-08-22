@@ -23,12 +23,12 @@ const createUserRouter = ({ User, Product, Address }) => {
         })
 
         if (phone) {
-            res.status(500).json({
-                message: 'Số điện thoại đã được đăng ký tại semo. 🙄'
+            res.send({
+                existed: true
             })
         } else {
-            res.status(200).json({
-                message: 'OK'
+            res.send({
+                existed: false
             })
         }
     })
@@ -110,11 +110,11 @@ const createUserRouter = ({ User, Product, Address }) => {
 
                 // save to the database
                 user.save().then(() => {
-                    res.status(201).json({
+                    res.status(201).send({
                         message: 'Cảm ơn và chào mừng đã đến với chúng mình. 🥰'
                     })
                 }).catch((error) => {
-                    res.status(403).json({
+                    res.status(403).send({
                         error: error.message
                     })
                 })
