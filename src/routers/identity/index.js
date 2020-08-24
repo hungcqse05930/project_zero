@@ -3,6 +3,20 @@ const express = require('express')
 const createIdentityRouter = ({ Identity }) => {
     const router = express.Router()
 
+    router.get('/user/id/:id', async (req, res) => {
+        const identity = await Identity.findOne({
+            where: {
+                user_id: req.params.id
+            }
+        })
+
+        if (identity) {
+            res.send(identity)
+        } else {
+            res.send(404)
+        }
+    })
+
     // inser new idenity 
     router.post('/', async (req, res) => {
         const identity = {
@@ -29,7 +43,7 @@ const createIdentityRouter = ({ Identity }) => {
     //Description: Get top 6 newest posts, order by date created descending
     router.get('/aution/:id', async (req, res) => {
         // find by primary key = find by id
-   
+
         if (autionBid) {
             res.send(autionBid)
         } else {

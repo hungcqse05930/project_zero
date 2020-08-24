@@ -244,7 +244,8 @@ const createCollectionRouter = ({ Collection, CollectionAuction, Auction, Produc
             attributes: [
                 'id',
                 'title',
-                'img_url'
+                'img_url',
+                'description'
             ],
             order: [['date_created', 'DESC']],
             where: {
