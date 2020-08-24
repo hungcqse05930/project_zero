@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Auction , User }) => {
+const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Auction, User }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -37,24 +37,24 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Aucti
         // limit: number of records you get
         const limit = Number.parseInt(req.query.limit) || 12
 
-        User.hasMany(Product , {foreignKey:'user_id'})
-        Product.belongsTo(User , {foreignKey: 'user_id'})
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        Product.belongsTo(User, { foreignKey: 'user_id' })
 
         Product.hasMany(Affair, { foreignKey: 'product_id' })
         Affair.belongsTo(Product, { foreignKey: 'product_id' })
 
         const affair = await Affair.findAll({
-            offset,limit,
-            include:[{
+            offset, limit,
+            include: [{
                 model: Product,
-                attributes : ['id'],
-                required:true,
-                include:[{
+                attributes: ['id'],
+                required: true,
+                include: [{
                     model: User,
-                    where:{
+                    where: {
                         id: req.params.id
                     },
-                    required:true
+                    required: true
                 }]
             }]
         })
@@ -68,6 +68,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Aucti
 
 
     // thêm chat mới
+    // cần sửa chưa chạy đc code 
     router.post('/addChat', async (req, res) => {
 
         const chat = await AffairChat.create({
@@ -144,9 +145,9 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Aucti
                         //required: true
                     }
                 }],
-                //price_cur : Number.parseFloat(Product.price_cur) * 0.1
+            //price_cur : Number.parseFloat(Product.price_cur) * 0.1
         })
-        
+
 
         if (percentAmount) {
             res.send(
@@ -177,6 +178,26 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Aucti
         if (update) {
             res.send(update)
         } else {
+            res.send(status)
+        }
+    })
+
+    // Lấy các Contract thuộc user_id 
+    router.get('/getContract/:id', async (req, res) => {
+
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 12
+
+        const chat = await AffairContract.findAll({
+            where: { user_id: req.params.id },
+            offset, limit,
+
+        })
+        if (chat) {
+            res.send(chat)
+        }
+        else {
             res.send(status)
         }
     })

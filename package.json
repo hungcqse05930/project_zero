@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha **/*.specs.js --watch --recursive",
+    "test-once": "mocha **/*.specs.js --recursive"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +26,10 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "nodemon": "^2.0.4"
+    "mocha": "^8.1.1",
+    "nodemon": "^2.0.4",
+    "sqlite3": "^5.0.0",
+    "supertest": "^4.0.2"
   },
   "engines": {
     "node": "12.16.3"
