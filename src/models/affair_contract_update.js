@@ -1,19 +1,16 @@
 const { Sequelize, Model, DataTypes } = require('sequelize')
 
-const createAffairContractModel = (sequelize) => {
-    class AffairContract extends Model { }
+const createAffairContractUpdateModel = (sequelize) => {
+    class AffairContractUpdate extends Model { }
 
     // return class' structure
-    return AffairContract.init({
+    return AffairContractUpdate.init({
         id: {
             type: DataTypes.BIGINT,
             primaryKey: true,
             autoIncrement: true
         },
-        affair_id: {
-            type: DataTypes.BIGINT
-        },
-        product_id: {
+        affair_contract_id: {
             type: DataTypes.BIGINT
         },
         shipment_user_id :{
@@ -46,12 +43,12 @@ const createAffairContractModel = (sequelize) => {
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'affair_contract',
+        tableName: 'affair_contract_update',
         // compulsary
         timestamps: false,
     })
 }
 
 module.exports = {
-    createAffairContractModel,
+    createAffairContractUpdateModel,
 }

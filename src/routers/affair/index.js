@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Auction , User }) => {
+const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, ProductMedia, Auction, User }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -30,6 +30,63 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Aucti
         }
     })
 
+    // get all information for affair view
+    router.get('/id/:id', async (req, res) => {
+        Affair.belongsTo(Product, { foreignKey: 'product_id' })
+        Product.hasMany(Affair, { foreignKey: 'product_id' })
+
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+
+        Affair.hasOne(AffairContract, { foreignKey: 'affair_id' })
+        AffairContract.belongsTo(Affair, { foreignKey: 'affair_id' })
+
+        Affair.hasMany(AffairChat, { foreignKey: 'affair_id' })
+        AffairChat.belongsTo(Affair, { foreignKey: 'affair_id' })
+
+        await Affair.findOne({
+            where: {
+                id: req.params.id
+            },
+            include: [
+                {
+                    model: Product,
+                    required: true,
+                    include: [{
+                        model: ProductMedia,
+                        required: true
+                    },
+                    {
+                        model: User,
+                        required: true
+                    }]
+                },
+                {
+                    model: AffairChat,
+                    // required: true
+                },
+                {
+                    model: AffairContract,
+                    // required: true
+                }
+            ]
+        })
+            .then(affair => {
+                if (!affair) {
+                    res.sendStatus(404)
+                    return
+                }
+
+                res.send(affair)
+            })
+            .catch(error => {
+                res.send(error)
+            })
+    })
+
     // Lấy các affair thuộc user_id 
     router.get('/getAll/:id', async (req, res) => {
 
@@ -37,24 +94,24 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Aucti
         // limit: number of records you get
         const limit = Number.parseInt(req.query.limit) || 12
 
-        User.hasMany(Product , {foreignKey:'user_id'})
-        Product.belongsTo(User , {foreignKey: 'user_id'})
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        Product.belongsTo(User, { foreignKey: 'user_id' })
 
         Product.hasMany(Affair, { foreignKey: 'product_id' })
         Affair.belongsTo(Product, { foreignKey: 'product_id' })
 
         const affair = await Affair.findAll({
-            offset,limit,
-            include:[{
+            offset, limit,
+            include: [{
                 model: Product,
-                attributes : ['id'],
-                required:true,
-                include:[{
+                attributes: ['id'],
+                required: true,
+                include: [{
                     model: User,
-                    where:{
+                    where: {
                         id: req.params.id
                     },
-                    required:true
+                    required: true
                 }]
             }]
         })
@@ -144,9 +201,9 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Aucti
                         //required: true
                     }
                 }],
-                //price_cur : Number.parseFloat(Product.price_cur) * 0.1
+            //price_cur : Number.parseFloat(Product.price_cur) * 0.1
         })
-        
+
 
         if (percentAmount) {
             res.send(

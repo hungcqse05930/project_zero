@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const { Sequelize, Op, where } = require('sequelize');
 // const timediff = require('timediff');
 
-const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fruit }) => {
+const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fruit, Affair }) => {
     const router = express.Router()
 
     // pending
@@ -44,6 +44,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
             price_init: req.body.price_init,
             price_step: req.body.price_step,
             product_type: req.body.product_type,
+            notes: req.body.notes
         }
 
         await Product.create(product)
@@ -271,35 +272,118 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         Address.hasMany(Product, { foreignKey: 'address_id' })
         Product.belongsTo(Address, { foreignKey: 'address_id' })
 
-        // offset: number of records you skip
-        const offset = Number.parseInt(req.query.offset) || 0
-        // limit: number of records you get
-        const limit = Number.parseInt(req.query.limit) || 5
+        let status = req.params.status
 
-        const fruit = await Product.findAll({
-            where: {
-                product_status: req.params.status,
-                user_id: req.params.id
-            },
-            include: [
-                {
-                    model: ProductMedia,
-                    attributes: ['media_url'],
-                    limit: 1
+        if (status <= 2 || status === 9) {
+            const fruit = await Product.findAll({
+                where: {
+                    product_status: req.params.status,
+                    user_id: req.params.id
                 },
-                {
-                    model: Address,
-                    attributes: ['province'],
-                    required: true
-                }
-            ]
-            // required: true
-        })
+                include: [
+                    {
+                        model: ProductMedia,
+                        attributes: ['media_url'],
+                        limit: 1
+                    },
+                    {
+                        model: Address,
+                        attributes: ['province'],
+                        required: true
+                    }
+                ],
+                order: [['date_created', 'DESC']]
+                // required: true
+            })
 
-        if (fruit) {
-            res.send(fruit)
-        } else {
-            res.sendStatus(404)
+            if (fruit) {
+                res.send(fruit)
+            } else {
+                res.sendStatus(404)
+            }
+        } else if (status == 3) {
+            Product.hasMany(Auction, { foreignKey: 'product_id' })
+            Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+            const fruit = await Product.findAll({
+                where: {
+                    product_status: req.params.status,
+                    user_id: req.params.id
+                },
+                include: [
+                    {
+                        model: ProductMedia,
+                        attributes: ['media_url'],
+                        limit: 1
+                    },
+                    {
+                        model: Address,
+                        attributes: ['province'],
+                        required: true
+                    },
+                    {
+                        model: Auction,
+                        attributes: [
+                            'id',
+                            'views',
+                            [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_days'],
+                            [Sequelize.fn('timediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
+                        ],
+                        order: [['date_created', 'DESC']],
+                        limit: 1,
+                        required: true,
+                    },
+                ],
+                order: [['date_created', 'DESC']]
+                // required: true
+            })
+
+            if (fruit) {
+                res.send(fruit)
+            } else {
+                res.sendStatus(404)
+            }
+        } else if (status >= 4 && status <= 5) {
+            Product.hasMany(Affair, { foreignKey: 'product_id' })
+            Affair.belongsTo(Product, { foreignKey: 'product_id' })
+
+            const fruit = await Product.findAll({
+                where: {
+                    product_status: req.params.status,
+                    user_id: req.params.id
+                },
+                include: [
+                    {
+                        model: ProductMedia,
+                        attributes: ['media_url'],
+                        limit: 1
+                    },
+                    {
+                        model: Address,
+                        attributes: ['province'],
+                        required: true
+                    },
+                    {
+                        model: Affair,
+                        attributes: [
+                            'id',
+                            'date_created',
+                            'date_updated',
+                        ],
+                        as: 'Affairs',
+                        order: [['date_created', 'DESC']],
+                        limit: 1
+                    }
+                ],
+                order: [['date_created', 'DESC']]
+                // required: true
+            })
+
+            if (fruit) {
+                res.send(fruit)
+            } else {
+                res.sendStatus(404)
+            }
         }
     })
 
@@ -382,7 +466,18 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
                 }
             }
         ).then(response => {
-
+            response[0] === 1 ?
+                res.send({
+                    message: 'Thành công'
+                })
+                :
+                res.status(500).send({
+                    message: 'Thất bại'
+                })
+        }).catch(error => {
+            res.status(500).send({
+                message: error.message
+            })
         })
     })
 

@@ -1,45 +1,45 @@
 const { Sequelize, Model, DataTypes } = require('sequelize')
 
-const createAffairModel = (sequelize) => {
-    class Affair extends Model { }
+const createDepositModel = (sequelize) => {
+    class Deposit extends Model {}
 
     // return class' structure
-    return Affair.init({
+    return Deposit.init({
         id: {
             type: DataTypes.BIGINT,
             primaryKey: true,
             autoIncrement: true
         },
+        src_wallet_id: {
+            type: DataTypes.BIGINT
+        },
         product_id: {
             type: DataTypes.BIGINT
         },
-        seller_user_id: {
-            type: DataTypes.BIGINT
+        amount: {
+            type: DataTypes.DOUBLE
         },
-        buyer_user_id: {
-            type: DataTypes.BIGINT
+        notes: {
+            type: DataTypes.STRING
         },
-        deposit_id: {
-            type: DataTypes.BIGINT
+        user_status :{
+            type: DataTypes.TINYINT
         },
-        affair_status: {
+        admin_status: {
             type: DataTypes.TINYINT
         },
         date_created: {
-            type: 'TIMESTAMP'
-        },
-        date_updated: {
             type: 'TIMESTAMP'
         }
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'affair',
+        tableName: 'auction',
         // compulsary
         timestamps: false,
     })
 }
 
 module.exports = {
-    createAffairModel,
+    createDepositModel,
 }

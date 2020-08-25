@@ -45,12 +45,12 @@ const createUserRouter = ({ User, Product, Address }) => {
             },
             include: [{
                 model: Address,
-                require: true,
+                // require: true,
                 attributes: ['province'],
                 where: {
                     default_address: 1
-                }
-                // required: true
+                },
+                required: false
             }]
         })
             .then((user) => {

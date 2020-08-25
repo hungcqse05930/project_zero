@@ -266,6 +266,34 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
             })
     })
 
+    // update date_closure after creation
+    router.put('/create', async (req, res) => {
+        const auction = await Auction.update(
+            {
+                date_closure: req.body.date_closure
+            },
+            {
+                where: {
+                    product_id: req.body.id
+                },
+                order: [
+                    ['date_created', 'DESC']
+                ],
+                limit: 1
+            }
+        )
+
+        if (auction[0] === 1) {
+            res.send({
+                message: 'Thành công.'
+            })
+        } else {
+            res.status(404).send({
+                message: 'Thất bại.'
+            })
+        }
+    })
+
     // vao auction view + 1
     router.put('/view/:id', async (req, res) => {
 

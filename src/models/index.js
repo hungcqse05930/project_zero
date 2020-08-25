@@ -17,6 +17,8 @@ const { createCollectionModel } = require('./collection')
 const { createAffairModel } = require('./affair')
 const { createAffairChatModel } = require('./affair_chat')
 const { createAffairContractModel } = require('./affair_contract')
+const { createAffairContractUpdateModel } = require('./affair_contract_update')
+const { createDepositModel } = require('./deposit')
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
     // establish a connection
@@ -29,24 +31,26 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
     await sequelize.authenticate()
 
     return {
-        Product: createProductModel(sequelize),
-        User: createUserModel(sequelize),
-        Fruit: createFruitModel(sequelize),
-        Institution: createInstitutionModel(sequelize),
         Address : createAddressModel (sequelize),
-        AuctionBid : createAuctionBidModel (sequelize),
+        Admin: createAdminModel(sequelize),
+        Affair : createAffairModel(sequelize),
+        AffairChat : createAffairChatModel (sequelize),
+        AffairContract : createAffairContractModel (sequelize),
+        AffairContractUpdate: createAffairContractUpdateModel (sequelize),
         Auction : createAuctionModel (sequelize),
-        Wallet : createWalletModel (sequelize),
+        AuctionBid : createAuctionBidModel (sequelize),
+        Collection : createCollectionModel(sequelize),
+        CollectionAuction : createCollectionAuctionModel(sequelize),
+        Deposit: createDepositModel(sequelize),
+        Fruit: createFruitModel(sequelize),
+        Identity: createIdentityModel(sequelize),
+        Institution: createInstitutionModel(sequelize),
+        Product: createProductModel(sequelize),
         ProductMedia : createProductMediaModel (sequelize),
         ProductUpdate : createProductUpdateModel(sequelize),
         ProductUpdateRequest : createProductUpdateRequestModel(sequelize),
-        Identity: createIdentityModel(sequelize),
-        Admin: createAdminModel(sequelize),
-        Collection : createCollectionModel(sequelize),
-        CollectionAuction : createCollectionAuctionModel(sequelize),
-        Affair : createAffairModel(sequelize),
-        AffairChat : createAffairChatModel (sequelize),
-        AffairContract : createAffairContractModel (sequelize)
+        User: createUserModel(sequelize),
+        Wallet : createWalletModel (sequelize),
     }
 }
 

@@ -16,7 +16,7 @@ const { Sequelize } = require('sequelize')
 
 
 
-const createAdminRouter = ({ Admin, Auction, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address }) => {
+const createAdminRouter = ({ Admin, Affair, Auction, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address }) => {
     const router = express.Router()
 
     // Review post by id
@@ -423,6 +423,60 @@ const createAdminRouter = ({ Admin, Auction, Product, Fruit, ProductUpdateReques
                 message: 'Yêu cầu không hợp lệ'
             })
         }
+    })
+
+    // AFFAIR
+    // get affairs for dashboard
+    router.get('/affair', async (req, res) => {
+        Product.hasMany(Affair, { foreignKey: 'product_id' })
+        Affair.belongsTo(Product, { foreignKey: 'product_id' })
+
+        await Affair.findAll({
+            attributes: {
+                include: [
+                    [
+                        Sequelize.literal(`(
+                            SELECT title
+                            FROM product
+                            WHERE
+                            product.id = Affair.product_id
+                        )`),
+                        'product'
+                    ],
+                    [
+                        Sequelize.literal(`(
+                            SELECT name
+                            FROM user
+                            WHERE
+                            user.id = Affair.seller_user_id
+                        )`),
+                        'seller'
+                    ],
+                    [
+                        Sequelize.literal(`(
+                            SELECT name
+                            FROM user
+                            WHERE
+                            user.id = Affair.buyer_user_id
+                        )`),
+                        'buyer'
+                    ]
+                ],
+            },
+            order: [['date_updated', 'DESC']]
+        })
+        .then(fruits => {
+            if(!fruits) {
+                res.sendStatus(404)
+            }
+
+            res.send(fruits)
+        })
+        .catch(error => {
+            res.send({
+                message: error.message
+            })
+        })
     })
 
     return router
