@@ -26,7 +26,7 @@ const createAddressRouter = ({ Address }) => {
             offset, limit
         })
 
-        if (address) {
+        if (address.length) {
             res.send(address)
         } else {
             res.sendStatus(404)

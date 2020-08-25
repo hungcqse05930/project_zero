@@ -125,6 +125,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Produ
 
 
     // thêm chat mới
+    // cần sửa chưa chạy đc code 
     router.post('/addChat', async (req, res) => {
 
         const chat = await AffairChat.create({
@@ -234,6 +235,26 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Produ
         if (update) {
             res.send(update)
         } else {
+            res.send(status)
+        }
+    })
+
+    // Lấy các Contract thuộc user_id 
+    router.get('/getContract/:id', async (req, res) => {
+
+        const offset = Number.parseInt(req.query.offset) || 0
+        // limit: number of records you get
+        const limit = Number.parseInt(req.query.limit) || 12
+
+        const chat = await AffairContract.findAll({
+            where: { user_id: req.params.id },
+            offset, limit,
+
+        })
+        if (chat) {
+            res.send(chat)
+        }
+        else {
             res.send(status)
         }
     })
