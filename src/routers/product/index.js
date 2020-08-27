@@ -274,7 +274,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
 
         let status = req.params.status
 
-        if (status <= 2 || status === 9) {
+        if (status <= 2 || status == 9) {
             const fruit = await Product.findAll({
                 where: {
                     product_status: req.params.status,
@@ -293,7 +293,6 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
                     }
                 ],
                 order: [['date_created', 'DESC']]
-                // required: true
             })
 
             if (fruit) {

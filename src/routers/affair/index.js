@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, ProductMedia, Auction, User }) => {
+const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContractUpdate, Product, ProductMedia, Auction, User }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -66,11 +66,14 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Produ
                 },
                 {
                     model: AffairChat,
-                    // required: true
                 },
                 {
                     model: AffairContract,
-                    // required: true
+                    attributes: [
+                        'id',
+                        'date_updated'
+                    ],
+                    required: true
                 }
             ]
         })
@@ -85,6 +88,74 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Produ
             .catch(error => {
                 res.send(error)
             })
+    })
+
+    router.get('/contract/id/:id', async (req, res) => {
+        AffairContract.belongsTo(User, { as: 'change_user', foreignKey: 'change_user_id' })
+        AffairContract.belongsTo(User, { as: 'shipment_user', foreignKey: 'shipment_user_id' })
+        AffairContract.belongsTo(Product, { foreignKey: 'product_id' })
+
+        AffairContract.hasMany(AffairContractUpdate, { foreignKey: 'affair_contract_id' })
+        AffairContractUpdate.belongsTo(AffairContract, { foreignKey: 'affair_contract_id' })
+
+        const contract = await AffairContract.findOne({
+            where: {
+                id: req.params.id
+            },
+            include: [
+                {
+                    model: Product,
+                    attributes: [
+                        'price_cur'
+                    ],
+                    required: true
+                },
+                {
+                    model: User,
+                    attributes: [
+                        'id',
+                        'img_url',
+                        'name'
+                    ],
+                    where: {
+                        id: Sequelize.col('AffairContract.shipment_user_id')
+                    },
+                    required: true,
+                    as: 'shipment_user'
+                },
+                {
+                    model: User,
+                    attributes: [
+                        'id',
+                        'img_url',
+                        'name'
+                    ],
+                    where: {
+                        id: Sequelize.col('AffairContract.change_user_id')
+                    },
+                    required: true,
+                    as: 'change_user'
+                },
+                {
+                    model: AffairContractUpdate,
+                    where: {
+                        affair_contract_id: req.params.id
+                    },
+                    order: [
+                        ['date_updated', 'DESC']
+                    ],
+                    limit: 1
+                }
+            ]
+        })
+
+        if(contract) {
+            res.send(contract)
+        } else {
+            res.status(404).send({
+                message: 'Không tồn tại'
+            })
+        }
     })
 
     // Lấy các affair thuộc user_id 
@@ -216,7 +287,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Produ
     })
 
     // update affair_contract for bider_user_id
-    router.put('/updateContract/:id', async (req, res) => {
+    router.put('/contract/:id', async (req, res) => {
         const update = await AffairContract.update({
             shipment_user_id: req.body.shipment_user_id,
             shipment_date: req.body.shipment_date,
@@ -228,7 +299,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Produ
         },
             {
                 where: {
-                    id: req.params.id
+                    affair_id: req.params.id
                 }
             })
 
@@ -239,25 +310,25 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, Product, Produ
         }
     })
 
-    // Lấy các Contract thuộc user_id 
-    router.get('/getContract/:id', async (req, res) => {
+    // // Lấy các Contract thuộc user_id 
+    // router.get('/getContract/:id', async (req, res) => {
 
-        const offset = Number.parseInt(req.query.offset) || 0
-        // limit: number of records you get
-        const limit = Number.parseInt(req.query.limit) || 12
+    //     const offset = Number.parseInt(req.query.offset) || 0
+    //     // limit: number of records you get
+    //     const limit = Number.parseInt(req.query.limit) || 12
 
-        const chat = await AffairContract.findAll({
-            where: { user_id: req.params.id },
-            offset, limit,
+    //     const chat = await AffairContract.findAll({
+    //         where: { user_id: req.params.id },
+    //         offset, limit,
 
-        })
-        if (chat) {
-            res.send(chat)
-        }
-        else {
-            res.send(status)
-        }
-    })
+    //     })
+    //     if (chat) {
+    //         res.send(chat)
+    //     }
+    //     else {
+    //         res.send(status)
+    //     }
+    // })
 
     // update affair_contract for user_id
     router.put('/updateContract/:id', async (req, res) => {

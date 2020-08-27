@@ -69,36 +69,53 @@ describe('GET /province', () => {
         supertest(app)
             .get('/address/province')
             //.expect('Content-Type', /json/)
-            .expect(200 , done)
+            .expect(200, done)
     })
 
     it('Response 302 for Found province', (done) => {
         supertest(app)
             .get('/address/province')
             //.expect('Content-Type', /json/)
-            .expect(200 , done)
+            .expect(200, done)
     })
 
     it('Response 306 for unused province', (done) => {
         supertest(app)
             .get('/address/province')
             //.expect('Content-Type', /json/)
-            .expect(200 , done)
+            .expect(200, done)
     })
 
 })
 
-describe('Delete /user/:id test cases' , () => {
+describe('Delete /user/:id test cases', () => {
     it('Delete nonexistent ID should return error: id not found', (done) => {
         supertest(app)
             .delete('/address/user/404')
             .expect(404, done)
-            .expect('{"error":"no todo found with that id"}')       
+            .expect('{"error":"no todo found with that id"}')
     })
 
     it('Response 204 for Delete exists address', (done) => {
         supertest(app)
             .delete('/address/user/1')
-            .expect(204 , done)  
+            .expect(204, done)
     })
 })
+
+describe('Post / test case ', () => {
+    let address = {
+        "user_id": "111",
+        "province": "1111",
+        "district": "22222",
+        "ward": "33333",
+        "address": "4444",
+    }
+    it('Response 200 for create new address', (done) => {
+        supertest(app)
+            .post('/')
+            .send(address)
+            .expect(200, done)
+    })
+})
+

@@ -5,20 +5,76 @@ const { Sequelize, Op, QueryTypes } = require('sequelize')
 const product = require('../product')
 
 
-const createFruitRouter = ({ Fruit, Product }) => {
+const createFruitRouter = ({ Address, Auction, Fruit, Product, ProductMedia }) => {
     const router = express.Router()
 
     // get titleOfFruit by id
     router.get('/id/:id', async (req, res) => {
         // find by primary key = find by id
         const fruit = await Fruit.findOne({
-            attributes: ['title'],
             where: { id: req.params.id }
         })
         if (fruit) {
             res.send(fruit)
         } else {
             res.sendStatus(404)
+        }
+    })
+
+    // get auctions in fruit
+    router.get('/auctions/:id', async (req, res) => {
+        // product 1 - n auction
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        // address 1 - n product
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        // product 1 - n product_media
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        const auctions = await Auction.findAll({
+            attributes: [
+                'id',
+                [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],
+                'price_cur',
+                'views'
+            ],
+            order: [['date_created', 'DESC']],
+            include: [
+                {
+                    model: Product,
+                    attributes: ['id', 'title', 'weight'],
+                    include: [
+                        {
+                            model: Address,
+                            attributes: ['province'],
+                            required: true
+                        },
+                        {
+                            model: ProductMedia,
+                            attributes: ['media_url'],
+                            order: [['date_created', 'DESC']],
+                            limit: 1
+                        }
+                    ],
+                    where: {
+                        fruit_id: req.params.id
+                    },
+                    required: true
+                }
+            ],
+            where : {
+                auction_status: 1
+            }
+        })
+
+        if (auctions) {
+            res.send(auctions)
+        } else {
+            res.status(404)
         }
     })
 
@@ -42,7 +98,6 @@ const createFruitRouter = ({ Fruit, Product }) => {
                 ],
             },
             order: [[Sequelize.col('product_count'), 'DESC']],
-            limit: 20,
         })
 
         if (fruits) {

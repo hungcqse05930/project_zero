@@ -110,7 +110,6 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                 'price_cur',
                 'views'
             ],
-            limit: 30,
             order: [['date_created', 'DESC']],
             include: [
                 {
@@ -383,7 +382,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
 
         const products = await Auction.findAll({
             attributes: ['id', 'price_cur', 'views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
-            limit: 10,
+            // limit: 10,
             where: { auction_status: 1 },
             include: [{
                 model: Product,
@@ -426,7 +425,6 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
 
         const products = await Auction.findAll({
             attributes: ['id', 'price_cur', 'views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
-            limit: 20,
             where: { auction_status: 1 },
             include: [{
                 model: Product,
