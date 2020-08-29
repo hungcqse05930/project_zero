@@ -15,7 +15,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
 
         const offset = Number.parseInt(req.query.offset) || 0
         // limit: number of records you get
-        const limit = Number.parseInt(req.query.limit) || 12
+        const limit = 12
 
         const chat = await AffairChat.findAll({
             where: { affair_id: req.params.id },
@@ -44,9 +44,6 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
         Affair.hasOne(AffairContract, { foreignKey: 'affair_id' })
         AffairContract.belongsTo(Affair, { foreignKey: 'affair_id' })
 
-        Affair.hasMany(AffairChat, { foreignKey: 'affair_id' })
-        AffairChat.belongsTo(Affair, { foreignKey: 'affair_id' })
-
         await Affair.findOne({
             where: {
                 id: req.params.id
@@ -63,9 +60,6 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
                         model: User,
                         required: true
                     }]
-                },
-                {
-                    model: AffairChat,
                 },
                 {
                     model: AffairContract,
@@ -202,7 +196,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
         const chat = await AffairChat.create({
             affair_id: req.body.affair_id,
             sender_user_id: req.body.sender_user_id,
-            content: req.body.sender_user_id
+            content: req.body.content
         })
         if (chat) {
             res.send(chat)

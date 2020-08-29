@@ -110,16 +110,18 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
         })
     })
 
+    Transaction.belongsTo(Wallet, { as: 'src', foreignKey: 'src_wallet_id' })
+    Transaction.belongsTo(Wallet, { as: 'rcv', foreignKey: 'rcv_wallet_id' })
+
+    User.hasOne(Wallet, { foreignKey: 'user_id' })
+    Wallet.belongsTo(User, { foreignKey: 'user_id' })
+
     router.get('/transaction/wallet/id/:id', async (req, res) => {
         // Transaction.belongsTo(Wallet, { as: 'src', foreignKey: 'src_wallet_id' })
         // Transaction.belongsTo(Wallet, { as: 'rcv', foreignKey: 'rcv_wallet_id' })
 
         // Wallet.hasMany(Transaction, { foreignKey: 'src_wallet_id' })
-        Transaction.belongsTo(Wallet, { as: 'src', foreignKey: 'src_wallet_id' })
-        Transaction.belongsTo(Wallet, { as: 'rcv', foreignKey: 'rcv_wallet_id' })
 
-        User.hasOne(Wallet, { foreignKey: 'user_id' })
-        Wallet.belongsTo(User, { foreignKey: 'user_id' })
 
         await Transaction.findAll({
             where: {
@@ -160,12 +162,14 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
                     as: 'src'
                 },
             ]
-        }).then(transactions => {
+        })
+        .then(transactions => {
             res.send(transactions)
-        }).catch(error => {
+        })
+        .catch(error => {
             console.log(error)
             res.status(500).send(error)
-        })
+        })  
     })
 
     return router
