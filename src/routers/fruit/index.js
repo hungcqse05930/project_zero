@@ -38,6 +38,7 @@ const createFruitRouter = ({ Address, Auction, Fruit, Product, ProductMedia }) =
         const auctions = await Auction.findAll({
             attributes: [
                 'id',
+                [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
                 [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],
                 'price_cur',
                 'views'

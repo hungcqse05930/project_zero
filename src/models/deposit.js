@@ -34,7 +34,7 @@ const createDepositModel = (sequelize) => {
     }, {
         sequelize,
         // name of the table in database
-        tableName: 'auction',
+        tableName: 'deposit',
         // compulsary
         timestamps: false,
     })

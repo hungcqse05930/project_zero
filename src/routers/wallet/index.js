@@ -47,10 +47,10 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
 
     // get amount of money one has to pay
     router.get('/stats/:id/:wallet_id', async (req, res) => {
+        // auction deposits (for sellers)
         Wallet.hasMany(Deposit, { foreignKey: 'src_wallet_id' })
         Deposit.belongsTo(Wallet, { foreignKey: 'src_wallet_id' })
 
-        // auction deposits (for sellers)
         let auctionDeposits = await Deposit.sum('amount', {
             where: {
                 src_wallet_id: req.params.wallet_id,
@@ -62,13 +62,14 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
             return 0
         })
 
+        // auction bids (for buyers)
         Auction.hasMany(AuctionBid, { foreignKey: 'auction_id' })
         AuctionBid.belongsTo(Auction, { foreignKey: 'auction_id' })
 
-        // auction bids (for buyers)
         let bids = await AuctionBid.count({
             where: {
-                bidder_user_id: req.params.id
+                bidder_user_id: req.params.id,
+
             },
             include: [
                 {
@@ -79,7 +80,7 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
                     },
                     required: true
                 }
-            ]
+            ],
         }).then(result => {
             res.send(result)
         })
@@ -97,7 +98,13 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
                 user_status: 0
             }
         }).then(deposits => {
-            res.send(deposits)
+            if (deposits.length > 0) {
+                res.send(deposits)
+            } else {
+                res.send({
+                    message: 'Không có gì cả.'
+                })
+            }
         }).catch(error => {
             res.status(500).send(error)
         })
@@ -107,8 +114,9 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
         // Transaction.belongsTo(Wallet, { as: 'src', foreignKey: 'src_wallet_id' })
         // Transaction.belongsTo(Wallet, { as: 'rcv', foreignKey: 'rcv_wallet_id' })
 
-        Wallet.hasMany(Transaction, { foreignKey: 'src_wallet_id' })
-        Transaction.belongsTo(Wallet, { foreignKey: 'src_wallet_id' })
+        // Wallet.hasMany(Transaction, { foreignKey: 'src_wallet_id' })
+        Transaction.belongsTo(Wallet, { as: 'src', foreignKey: 'src_wallet_id' })
+        Transaction.belongsTo(Wallet, { as: 'rcv', foreignKey: 'rcv_wallet_id' })
 
         User.hasOne(Wallet, { foreignKey: 'user_id' })
         Wallet.belongsTo(User, { foreignKey: 'user_id' })
@@ -120,27 +128,42 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
                     { rcv_wallet_id: { [Op.eq]: req.params.id } }
                 ]
             },
+            attributes: [
+                'id',
+                'date_created',
+                'amount',
+                'notes',
+                [Sequelize.col('src.User.name'), 'src_name'],
+                [Sequelize.col('rcv.User.name'), 'rcv_name'],
+            ],
             include: [
                 {
                     model: Wallet,
-                    attributes: ['user_id'],
+                    attributes: [],
                     include: [
                         {
                             model: User,
                             attributes: ['name']
                         }
                     ],
-                    where: {
-                        [Op.or]: [
-                            { src_wallet_id: { [Op.eq]: req.params.id } },
-                            { rcv_wallet_id: { [Op.eq]: req.params.id } }
-                        ]
-                    }, 
+                    as: 'rcv'
+                },
+                {
+                    model: Wallet,
+                    attributes: [],
+                    include: [
+                        {
+                            model: User,
+                            attributes: ['name']
+                        }
+                    ],
+                    as: 'src'
                 },
             ]
         }).then(transactions => {
             res.send(transactions)
         }).catch(error => {
+            console.log(error)
             res.status(500).send(error)
         })
     })

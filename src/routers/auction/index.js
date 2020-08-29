@@ -54,6 +54,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         const auctions = await Auction.findAll({
             attributes: [
                 'id',
+                [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
                 [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],
                 'price_cur',
                 'views'
@@ -110,6 +111,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         const auctions = await Auction.findAll({
             attributes: [
                 'id',
+                [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
                 [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],
                 'price_cur',
                 'views'
@@ -165,6 +167,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         const auctions = await Auction.findAll({
             attributes: [
                 'id',
+                [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
                 [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],
                 'price_cur',
                 'views'
@@ -271,7 +274,6 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
 
     // update date_closure after creation
     router.put('/create', async (req, res) => {
-        console.log(req.body.date_closure)
         const auction = await Auction.update(
             {
                 date_closure: req.body.date_closure
@@ -287,10 +289,17 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
             }
         )
 
-        console.log(auction)
+        if (auction[0] === 1) {
+            res.send({
+                message: 'Thành công.'
+            })
+        } else {
+            res.status(404).send({
+                message: 'Thất bại.'
+            })
+        }
 
         let cur_date = new Date()
-        console.log('time gap: ' + Date.parse(req.body.date_closure).toString())
         await delay(Date.parse(req.body.date_closure) - cur_date.getTime())
         await Auction.update({
             auction_status: 0
@@ -307,15 +316,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                 console.log('auction closed')
             })
 
-        if (auction[0] === 1) {
-            res.send({
-                message: 'Thành công.'
-            })
-        } else {
-            res.status(404).send({
-                message: 'Thất bại.'
-            })
-        }
+
     })
 
     // vao auction view + 1
@@ -368,7 +369,14 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                 }, {
                     model: Auction,
                     where: { id: req.params.id },
-                    attributes: ['id', 'price_cur', 'date_created', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'], 'auction_status'],
+                    attributes: [
+                        'id',
+                        'price_cur',
+                        'date_created',
+                        [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_days'],
+                        [Sequelize.fn('timediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
+                        'auction_status'
+                    ],
                     required: true,
                 }, {
                     model: Address,
@@ -449,7 +457,9 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
 
         const products = await Auction.findAll({
-            attributes: ['id', 'price_cur', 'views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
+            attributes: ['id', 'price_cur', 'views', 
+            [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
+            [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
             where: { auction_status: 1 },
             include: [{
                 model: Product,
