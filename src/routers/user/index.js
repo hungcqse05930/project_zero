@@ -10,7 +10,7 @@ const auth = require('../../middlewares/auth')
 // const { where } = require('sequelize/types')
 // const { Model } = require('sequelize/types')
 
-const createUserRouter = ({ User, Product, Address }) => {
+const createUserRouter = ({ User, Product, Address, Wallet }) => {
     const router = express.Router()
 
     // === BEFORE LOGIN ===
@@ -39,19 +39,28 @@ const createUserRouter = ({ User, Product, Address }) => {
         User.hasMany(Address, { foreignKey: 'user_id' })
         Address.belongsTo(User, { foreignKey: 'user_id' })
 
+        User.hasOne(Wallet, { foreignKey: 'user_id' })
+        Wallet.belongsTo(User, { foreignKey: 'user_id' })
+
         User.findOne({
             where: {
                 phone: req.body.phone
             },
-            include: [{
-                model: Address,
-                // require: true,
-                attributes: ['province'],
-                where: {
-                    default_address: 1
+            include: [
+                {
+                    model: Address,
+                    // require: true,
+                    attributes: ['province'],
+                    where: {
+                        default_address: 1
+                    },
+                    required: false
                 },
-                required: false
-            }]
+                {
+                    model: Wallet,
+                    required: true
+                }
+            ]
         })
             .then((user) => {
                 // wrong phone number
@@ -73,7 +82,7 @@ const createUserRouter = ({ User, Product, Address }) => {
                         // generate token
                         const token = jwt.sign(
                             { id: user.id },
-                            'DIT_ME_FPT',
+                            'HELLO_SEMO',
                             { expiresIn: '24h' })
 
                         res.status(200).json({

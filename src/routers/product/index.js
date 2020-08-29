@@ -12,12 +12,19 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
         Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
         ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
 
+        Fruit.hasOne(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
         const product = await Product.findOne({
             where: { id: req.params.id, },
             include: [{
                 model: ProductMedia,
                 attributes: ['media_url'],
                 required: true,
+            },
+            {
+                model: Fruit,
+                required: true
             }]
         }
         )

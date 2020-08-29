@@ -36,8 +36,6 @@ const createAuctionBidRouter = ({ AuctionBid, Auction, User }) => {
         }
     })
 
-
-
     // aprove
     // get all person bid at one auction_id
     router.get('/auction/:id', async (req, res) => {

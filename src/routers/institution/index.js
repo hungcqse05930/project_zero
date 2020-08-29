@@ -20,12 +20,8 @@ const createInstitutionRouter = ({ Institution }) => {
     // APPROVED
     // get all institution
     router.get('/', async (req, res) => {
-        // offset: number of records you skip
-        const offset = Number.parseInt(req.query.offset) || 0
-        // limit: number of records you get
-        const limit = Number.parseInt(req.query.limit) || 10
 
-        const institution = await Institution.findAll({ offset, limit })
+        const institution = await Institution.findAll()
 
         if (institution) {
             res.send(institution)

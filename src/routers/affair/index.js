@@ -73,8 +73,8 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
                         'id',
                         'date_updated'
                     ],
-                    required: true
-                }
+                    required: false
+                },
             ]
         })
             .then(affair => {
