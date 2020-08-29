@@ -10,7 +10,7 @@ const {
     // DB_USER = 'root',
     // DB_PASS = '0mqMw0Gis8I5zi2v',
     DB_PASS = '123456',
-    DB_NAME = 'semo_2.0', 
+    DB_NAME = 'semo_2.0',
 } = process.env
 
 // by doing this, app needs not to be initiated first, we can put vars into it

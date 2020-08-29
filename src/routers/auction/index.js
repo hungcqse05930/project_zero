@@ -10,6 +10,10 @@ const auction = require('../../models/auction')
 const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Address, ProductMedia }) => {
     const router = express.Router()
 
+    function delay(ms) {
+        return new Promise(ressolve => setTimeout(ressolve, ms))
+    }
+
     // get auction date created
     // chưa rõ chức năng
     router.get('/product/:id', async (req, res) => {
@@ -76,7 +80,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                     required: true
                 }
             ],
-            where : {
+            where: {
                 auction_status: 1
             }
         })
@@ -88,7 +92,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
             res.sendStatus(404)
         }
     })
-    
+
     // latest
     router.get('/latest', async (req, res) => {
         // product 1 - n auction
@@ -131,7 +135,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                     required: true
                 }
             ],
-            where : {
+            where: {
                 auction_status: 1
             }
         })
@@ -190,7 +194,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                     required: true
                 }
             ],
-            where : {
+            where: {
                 auction_status: 1
             }
         })
@@ -267,6 +271,7 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
 
     // update date_closure after creation
     router.put('/create', async (req, res) => {
+        console.log(req.body.date_closure)
         const auction = await Auction.update(
             {
                 date_closure: req.body.date_closure
@@ -281,6 +286,26 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                 limit: 1
             }
         )
+
+        console.log(auction)
+
+        let cur_date = new Date()
+        console.log('time gap: ' + Date.parse(req.body.date_closure).toString())
+        await delay(Date.parse(req.body.date_closure) - cur_date.getTime())
+        await Auction.update({
+            auction_status: 0
+        },
+            {
+                where: {
+                    product_id: req.body.id
+                },
+                order: [
+                    ['date_created', 'DESC']
+                ],
+                limit: 1
+            }).then(() => {
+                console.log('auction closed')
+            })
 
         if (auction[0] === 1) {
             res.send({

@@ -1,6 +1,7 @@
 // application logical processes
 const express = require('express')
 const bodyParser = require('body-parser')
+const moment = require('moment-timezone')
 
 const cors = require('cors')
 const { createModels } = require('./models/index')
@@ -28,6 +29,8 @@ const createApp = async ({ database }) => {
     });
 
     app.use(cors())
+
+    moment.tz.setDefault("Asia/Bangkok");
 
     // establish connection and authenticate it
     const models = await createModels(database)

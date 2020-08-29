@@ -135,7 +135,7 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
                             { src_wallet_id: { [Op.eq]: req.params.id } },
                             { rcv_wallet_id: { [Op.eq]: req.params.id } }
                         ]
-                    }, y
+                    }, 
                 },
             ]
         }).then(transactions => {

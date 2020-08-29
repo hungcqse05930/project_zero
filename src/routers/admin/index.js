@@ -16,7 +16,7 @@ const { Sequelize } = require('sequelize')
 
 
 
-const createAdminRouter = ({ Admin, Affair, Auction, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address }) => {
+const createAdminRouter = ({ Admin, Affair, Auction, Identity, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address }) => {
     const router = express.Router()
 
     // Review post by id
@@ -465,18 +465,67 @@ const createAdminRouter = ({ Admin, Affair, Auction, Product, Fruit, ProductUpda
             },
             order: [['date_updated', 'DESC']]
         })
-        .then(fruits => {
-            if(!fruits) {
-                res.sendStatus(404)
-            }
+            .then(fruits => {
+                if (!fruits) {
+                    res.sendStatus(404)
+                }
 
-            res.send(fruits)
-        })
-        .catch(error => {
-            res.send({
-                message: error.message
+                res.send(fruits)
             })
+            .catch(error => {
+                res.send({
+                    message: error.message
+                })
+            })
+    })
+
+    // IDENTITY
+    // get all identities
+    router.get('/identity', async (req, res) => {
+        User.hasOne(Identity, { foreignKey: 'user_id' })
+        Identity.belongsTo(User, { foreignKey: 'user_id' })
+
+        await Identity.findAll({
+            order: [
+                ['date_created', 'DESC']
+            ],
+            include: [
+                {
+                    model: User,
+                    attributes: [
+                        'name',
+                        'img_url'
+                    ],
+                    required: true,
+                }
+            ],
         })
+            .then(identities => {
+                res.send(identities)
+            })
+            .catch(error => {
+                res.status(500).send(error)
+            })
+    })
+
+    // review identity
+    router.put(`/identity`, async (req, res) => {
+        await Identity.update({
+            identity_status: req.body.identity_status
+        },
+            {
+                where: {
+                    id: req.body.id,
+                }
+            })
+            .then(() => {
+                res.status(201).send({
+                    message: 'Thành công.'
+                })
+            })
+            .catch((error) => {
+                res.status(500).send(error)
+            })
     })
 
     return router
