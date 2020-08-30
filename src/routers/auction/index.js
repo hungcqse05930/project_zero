@@ -315,8 +315,6 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
             }).then(() => {
                 console.log('auction closed')
             })
-
-
     })
 
     // vao auction view + 1

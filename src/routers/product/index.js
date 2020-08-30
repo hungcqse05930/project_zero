@@ -448,6 +448,12 @@ const createProductRouter = ({ Product, User, Auction, AuctionBid, Address, Prod
                 where: {
                     auction_status: 1,
                 },
+                attributes: {
+                    include: [
+                        [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
+                        [Sequelize.fn('datediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain'],
+                    ]
+                },
                 include: [
                     {
                         model: AuctionBid,
@@ -489,7 +495,7 @@ const createProductRouter = ({ Product, User, Auction, AuctionBid, Address, Prod
 
             await Affair.findAll({
                 where: {
-                    affair_status: status == 5 ? 2 : {[Op.or]: [0, 1]},
+                    affair_status: status == 5 ? 2 : { [Op.or]: [0, 1] },
                     buyer_user_id: req.params.id
                 },
                 include: [
@@ -516,9 +522,9 @@ const createProductRouter = ({ Product, User, Auction, AuctionBid, Address, Prod
                 .then(fruits => {
                     res.send(fruits)
                 })
-                // .catch(error => {
-                //     res.status(500).send(error)
-                // })
+            // .catch(error => {
+            //     res.status(500).send(error)
+            // })
         } else {
             res.status(500).send({
                 message: 'Yêu cầu không hợp lệ.'

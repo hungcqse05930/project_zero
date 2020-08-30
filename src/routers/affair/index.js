@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContractUpdate, Product, ProductMedia, Auction, User }) => {
+const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContractUpdate, Fruit, Product, ProductMedia, Auction, User }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -47,6 +47,8 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
         Affair.hasOne(AffairContract, { foreignKey: 'affair_id' })
         AffairContract.belongsTo(Affair, { foreignKey: 'affair_id' })
 
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
 
         await Affair.findOne({
             where: {
@@ -73,7 +75,12 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
                             'user_status'
                         ],
                         required: true
-                    }]
+                    },
+                    {
+                        model: Fruit,
+                        required: true
+                    }
+                ]
                 },
                 {
                     model: AffairContract,
