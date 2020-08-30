@@ -31,9 +31,6 @@ const createAffairContractUpdateModel = (sequelize) => {
         preservative_amount: {
             type: DataTypes.DOUBLE
         },
-        contract_status: {
-            type: DataTypes.TINYINT
-        },
         change_user_id:{
             type: DataTypes.BIGINT
         },

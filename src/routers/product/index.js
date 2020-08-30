@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const { Sequelize, Op, where } = require('sequelize');
 // const timediff = require('timediff');
 
-const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fruit, Affair }) => {
+const createProductRouter = ({ Product, User, Auction, AuctionBid, Address, ProductMedia, Fruit, Affair }) => {
     const router = express.Router()
 
     // pending
@@ -118,23 +118,7 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
     // !! move to admin
     // !! add fruit phải có cả fruit id
     // get post and user by id
-    // router.get('/product/:id', async (req, res) => {
-    //     Product.belongsTo(User, { foreignKey: 'user_id' })
-    //     User.hasMany(Product)
-    //     const products = await Product.findAll({
-    //         where: { id: req.params.id },
-    //         include: [
-    //             {
-    //                 model: User,
-    //                 required: false,
-    //             }]
-    //     })
-    //     if (products) {
-    //         res.send(products)
-    //     } else {
-    //         res.sendStatus(404)
-    //     }
-    // })
+
 
     // PENDING
     // Chưa lấy được datediff
@@ -390,6 +374,155 @@ const createProductRouter = ({ Product, User, Auction, Address, ProductMedia, Fr
             } else {
                 res.sendStatus(404)
             }
+        }
+    })
+
+    router.get('/user/bought/:id/:status', async (req, res) => {
+
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        let status = req.params.status
+
+        if (status == 3) {
+            Product.hasMany(Auction, { foreignKey: 'product_id' })
+            Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+            Auction.hasMany(AuctionBid, { foreignKey: 'auction_id' })
+            AuctionBid.belongsTo(Auction, { foreignKey: 'auction_id' })
+
+            // await Product.findAll({
+            //     where: Sequelize.literal(`Product.product_status = ${req.params.status}`),
+            //         // user_id: req.params.id
+            //     include: [
+            //         {
+            //             model: ProductMedia,
+            //             attributes: ['media_url'],
+            //             limit: 1,
+            //             required: true
+            //         },
+            //         {
+            //             model: Address,
+            //             attributes: ['province'],
+            //             required: true
+            //         },
+            //         {
+            //             model: Auction,
+            //             attributes: [
+            //                 'id',
+            //                 'views',
+            //                 [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_days'],
+            //                 [Sequelize.fn('timediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
+            //             ],
+            //             include: [
+            //                 {
+            //                     model: AuctionBid,
+            //                     attributes: [],
+            //                     where: {
+            //                         bidder_user_id: req.params.id
+            //                     },
+            //                     required: true,
+            //                 }
+            //             ],
+            //             order: [['date_created', 'DESC']],
+            //             limit: 1,
+            //             required: true,
+            //         },
+            //     ],
+            //     order: [['date_created', 'DESC']],
+            //     required: true
+            // }).then(fruits => {
+            //     res.send(fruits)
+            // })
+            // .catch(error => {
+            //     res.status(500).send(error)
+            // })
+
+            await Auction.findAll({
+                where: {
+                    auction_status: 1,
+                },
+                include: [
+                    {
+                        model: AuctionBid,
+                        where: {
+                            bidder_user_id: req.params.id
+                        },
+                        attributes: [],
+                        required: true,
+                    },
+                    {
+                        model: Product,
+                        required: true,
+                        include: [
+                            {
+                                model: ProductMedia,
+                                attributes: ['media_url'],
+                                limit: 1,
+                                required: true
+                            },
+                            {
+                                model: Address,
+                                attributes: ['province'],
+                                required: true
+                            },
+                        ]
+                    }
+                ],
+                order: [['date_created', 'DESC']],
+            })
+                .then(fruits => {
+                    res.send(fruits)
+                })
+                .catch(error => {
+                    res.status(500).send(error)
+                })
+        } else if (status == 4 || status == 5) {
+            Product.hasMany(Affair, { foreignKey: 'product_id' })
+            Affair.belongsTo(Product, { foreignKey: 'product_id' })
+
+            await Affair.findAll({
+                where: {
+                    affair_status: status == 5 ? 2 : {[Op.or]: [0, 1]},
+                    buyer_user_id: req.params.id
+                },
+                include: [
+                    {
+                        model: Product,
+                        required: true,
+                        include: [
+                            {
+                                model: ProductMedia,
+                                attributes: ['media_url'],
+                                limit: 1,
+                                required: true
+                            },
+                            {
+                                model: Address,
+                                attributes: ['province'],
+                                required: true
+                            },
+                        ]
+                    }
+                ],
+                order: [['date_created', 'DESC']],
+            })
+                .then(fruits => {
+                    res.send(fruits)
+                })
+                // .catch(error => {
+                //     res.status(500).send(error)
+                // })
+        } else {
+            res.status(500).send({
+                message: 'Yêu cầu không hợp lệ.'
+            })
         }
     })
 

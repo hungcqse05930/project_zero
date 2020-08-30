@@ -30,6 +30,9 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
         }
     })
 
+    Affair.belongsTo(User, { as: 'buyer', foreignKey: 'buyer_user_id' })
+    Affair.belongsTo(User, { as: 'seller', foreignKey: 'seller_user_id' })
+    
     // get all information for affair view
     router.get('/id/:id', async (req, res) => {
         Affair.belongsTo(Product, { foreignKey: 'product_id' })
@@ -44,6 +47,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
         Affair.hasOne(AffairContract, { foreignKey: 'affair_id' })
         AffairContract.belongsTo(Affair, { foreignKey: 'affair_id' })
 
+
         await Affair.findOne({
             where: {
                 id: req.params.id
@@ -54,10 +58,20 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
                     required: true,
                     include: [{
                         model: ProductMedia,
+                        attributes: [
+                            'media_url'
+                        ],
                         required: true
                     },
                     {
                         model: User,
+                        attributes: [
+                            'id',
+                            'name',
+                            'img_url',
+                            'rate',
+                            'user_status'
+                        ],
                         required: true
                     }]
                 },
@@ -67,8 +81,32 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
                         'id',
                         'date_updated'
                     ],
-                    required: false
+                    required: true
                 },
+                {
+                    model: User,
+                    attributes: [
+                        'id',
+                        'name',
+                        'img_url',
+                        'rate',
+                        'user_status'
+                    ],
+                    as: 'buyer',
+                    required: true
+                },
+                {
+                    model: User,
+                    attributes: [
+                        'id',
+                        'name',
+                        'img_url',
+                        'rate',
+                        'user_status'
+                    ],
+                    as: 'seller',
+                    required: true
+                }
             ]
         })
             .then(affair => {
@@ -84,9 +122,10 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
             })
     })
 
+    AffairContract.belongsTo(User, { as: 'change_user', foreignKey: 'change_user_id' })
+    AffairContract.belongsTo(User, { as: 'shipment_user', foreignKey: 'shipment_user_id' })
+
     router.get('/contract/id/:id', async (req, res) => {
-        AffairContract.belongsTo(User, { as: 'change_user', foreignKey: 'change_user_id' })
-        AffairContract.belongsTo(User, { as: 'shipment_user', foreignKey: 'shipment_user_id' })
         AffairContract.belongsTo(Product, { foreignKey: 'product_id' })
 
         AffairContract.hasMany(AffairContractUpdate, { foreignKey: 'affair_contract_id' })
@@ -98,13 +137,6 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
             },
             include: [
                 {
-                    model: Product,
-                    attributes: [
-                        'price_cur'
-                    ],
-                    required: true
-                },
-                {
                     model: User,
                     attributes: [
                         'id',
@@ -114,7 +146,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
                     where: {
                         id: Sequelize.col('AffairContract.shipment_user_id')
                     },
-                    required: true,
+                    required: false,
                     as: 'shipment_user'
                 },
                 {
@@ -127,7 +159,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
                     where: {
                         id: Sequelize.col('AffairContract.change_user_id')
                     },
-                    required: true,
+                    required: false,
                     as: 'change_user'
                 },
                 {
@@ -280,7 +312,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
         }
     })
 
-    // update affair_contract for bider_user_id
+    // confirm update affair_contract for bider_user_id
     router.put('/contract/:id', async (req, res) => {
         const update = await AffairContract.update({
             shipment_user_id: req.body.shipment_user_id,
@@ -301,6 +333,26 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
             res.send(update)
         } else {
             res.send(status)
+        }
+    })
+
+    // request update affair_contract for bider_user_id
+    router.post('/contract/update', async (req, res) => {
+        const update = await AffairContractUpdate.create({
+            affair_contract_id: req.body.id,
+            shipment_user_id: req.body.shipment_user_id,
+            shipment_date: req.body.shipment_date,
+            shipment_late_fee: req.body.shipment_late_fee,
+            payment_date: req.body.payment_date,
+            payment_late_fee: req.body.payment_late_fee,
+            preservative_amount: req.body.preservative_amount,
+            change_user_id: req.body.change_user_id
+        })
+
+        if (update) {
+            res.send(update)
+        } else {
+            res.status(500)
         }
     })
 
