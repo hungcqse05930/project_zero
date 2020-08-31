@@ -412,7 +412,9 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         const product = await Product.findByPk(auction.product_id)
 
         const products = await Auction.findAll({
-            attributes: ['id', 'price_cur', 'views', [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
+            attributes: ['id', 'price_cur', 'views',
+                [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
+                [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
             // limit: 10,
             where: { auction_status: 1 },
             include: [{
@@ -455,9 +457,9 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
 
         const products = await Auction.findAll({
-            attributes: ['id', 'price_cur', 'views', 
-            [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
-            [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
+            attributes: ['id', 'price_cur', 'views',
+                [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
+                [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
             where: { auction_status: 1 },
             include: [{
                 model: Product,

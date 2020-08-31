@@ -12,16 +12,10 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
     router.get('/chat/:id', async (req, res) => {
-
-        const offset = Number.parseInt(req.query.offset) || 0
-        // limit: number of records you get
-        const limit = 12
-
         const chat = await AffairChat.findAll({
             where: { affair_id: req.params.id },
-            offset, limit,
-
         })
+
         if (chat) {
             res.send(chat)
         }
