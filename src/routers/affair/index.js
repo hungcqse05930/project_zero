@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContractUpdate, Fruit, Product, ProductMedia, Auction, User }) => {
+const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, AffairContractUpdate, Fruit, Product, ProductMedia, Auction, User }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -44,6 +44,10 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
 
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+
         await Affair.findOne({
             where: {
                 id: req.params.id
@@ -72,6 +76,10 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
                     },
                     {
                         model: Fruit,
+                        required: true
+                    },
+                    {
+                        model: Address,
                         required: true
                     }
                 ]
@@ -340,7 +348,7 @@ const createAffairRouter = ({ Affair, AffairChat, AffairContract, AffairContract
     // request update affair_contract for bider_user_id
     router.post('/contract/update', async (req, res) => {
         const update = await AffairContractUpdate.create({
-            affair_contract_id: req.body.id,
+            affair_contract_id: req.body.affair_contract_id,
             shipment_user_id: req.body.shipment_user_id,
             shipment_date: req.body.shipment_date,
             shipment_late_fee: req.body.shipment_late_fee,
