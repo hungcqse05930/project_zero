@@ -133,12 +133,16 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
 
     AffairContract.belongsTo(User, { as: 'change_user', foreignKey: 'change_user_id' })
     AffairContract.belongsTo(User, { as: 'shipment_user', foreignKey: 'shipment_user_id' })
+    
+    User.hasMany(AffairContractUpdate, { as: 'shipment_user', foreignKey: 'shipment_user_id' })
+    AffairContractUpdate.belongsTo(User, { as: 'shipment_user', foreignKey: 'shipment_user_id' })
 
     router.get('/contract/id/:id', async (req, res) => {
         AffairContract.belongsTo(Product, { foreignKey: 'product_id' })
 
         AffairContract.hasMany(AffairContractUpdate, { foreignKey: 'affair_contract_id' })
         AffairContractUpdate.belongsTo(AffairContract, { foreignKey: 'affair_contract_id' })
+
 
         const contract = await AffairContract.findOne({
             where: {
@@ -176,6 +180,13 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
                     where: {
                         affair_contract_id: req.params.id
                     },
+                    include: [
+                        {
+                            model: User,
+                            required: true,
+                            as: 'shipment_user'
+                        }
+                    ],
                     order: [
                         ['date_updated', 'DESC']
                     ],
@@ -322,7 +333,7 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
     })
 
     // confirm update affair_contract for bider_user_id
-    router.put('/contract/:id', async (req, res) => {
+    router.put('/contract', async (req, res) => {
         const update = await AffairContract.update({
             shipment_user_id: req.body.shipment_user_id,
             shipment_date: req.body.shipment_date,
@@ -334,14 +345,14 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
         },
             {
                 where: {
-                    affair_id: req.params.id
+                    id: req.body.id
                 }
             })
 
         if (update) {
             res.send(update)
         } else {
-            res.send(status)
+            res.status(500)
         }
     })
 
