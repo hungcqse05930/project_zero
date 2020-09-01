@@ -103,6 +103,65 @@ const createUserRouter = ({ User, Product, Address, Wallet }) => {
             })
     })
 
+    // get user from token
+    router.get('/user', async (req, res, next) => {
+        let token = req.headers.token
+
+        jwt.verify(token, 'HELLO_SEMO', (err, decoded) => {
+            // token is invalid
+            if (err) {
+                return res.status(401).json({
+                    title: 'Vui lòng đăng nhập lại. 🙄'
+                })
+            }
+
+            // token is valid
+            User.hasMany(Address, { foreignKey: 'user_id' })
+            Address.belongsTo(User, { foreignKey: 'user_id' })
+
+            User.hasOne(Wallet, { foreignKey: 'user_id' })
+            Wallet.belongsTo(User, { foreignKey: 'user_id' })
+
+            User.findOne({
+                where: {
+                    id: decoded.id
+                },
+                include: [
+                    {
+                        model: Address,
+                        // require: true,
+                        attributes: ['province'],
+                        where: {
+                            default_address: 1
+                        },
+                        required: false
+                    },
+                    {
+                        model: Wallet,
+                        required: true
+                    }
+                ]
+            })
+                .then((user) => {
+                    // wrong phone number
+                    if (!user) {
+                        return res.status(401).send({
+                            message: "Người dùng không hợp lệ. 😪"
+                        })
+                    }
+
+                    res.status(200).json({
+                        user: user
+                    })
+                })
+                .catch((error) => {
+                    return res.status(500).json({
+                        error: error.message
+                    })
+                })
+        })
+    })
+
     // sign up
     router.post('/signup', async (req, res) => {
         // hash password then create a record in `user` table

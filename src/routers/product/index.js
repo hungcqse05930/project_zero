@@ -51,7 +51,8 @@ const createProductRouter = ({ Product, User, Auction, AuctionBid, Address, Prod
             price_init: req.body.price_init,
             price_step: req.body.price_step,
             product_type: req.body.product_type,
-            notes: req.body.notes
+            notes: req.body.notes,
+            img_dir: req.body.img_dir
         }
 
         await Product.create(product)
