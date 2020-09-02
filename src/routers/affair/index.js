@@ -356,6 +356,25 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
         }
     })
 
+    // cancel affair
+    router.put('/cancel', async (req, res) => {
+        await Affair.update({
+            affair_status: req.body.affair_status
+        }, {
+            where: {
+                id: req.body.id
+            }
+        })
+        .then(result => {
+            res.send({
+                message: 'Đã hủy giao kèo.'
+            })
+        })
+        .catch(error => {
+            res.status(500).send(error)
+        })
+    })
+
     // request update affair_contract for bider_user_id
     router.post('/contract/update', async (req, res) => {
         const update = await AffairContractUpdate.create({
@@ -435,7 +454,7 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
         if (updateStatus) {
             res.send(updateStatus)
         } else {
-            res.send(status)
+            res.status(500)
         }
     })
 
