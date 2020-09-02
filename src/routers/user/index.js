@@ -35,7 +35,6 @@ const createUserRouter = ({ User, Product, Address, Wallet }) => {
 
     // login
     router.post('/login', async (req, res) => {
-
         User.hasMany(Address, { foreignKey: 'user_id' })
         Address.belongsTo(User, { foreignKey: 'user_id' })
 

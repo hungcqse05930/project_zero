@@ -11,13 +11,222 @@ const uniqid = require('uniqid')
 const auth = require('../../middlewares/auth')
 const collection_auction = require('../../models/collection_auction')
 const address = require('../address')
-const { Sequelize } = require('sequelize')
+const { Sequelize, Transaction } = require('sequelize')
 // middleware
 
 
 
-const createAdminRouter = ({ Admin, Affair, Auction, Identity, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address }) => {
+const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address, Transaction }) => {
     const router = express.Router()
+
+    // LOG IN
+    // log in for admin
+    router.post('/login', async (req, res) => {
+        Admin.findOne({
+            where: {
+                username: req.body.username
+            }
+        })
+            .then(admin => {
+                if (!admin) {
+                    return res.status(401).send({
+                        message: "Tài khoản không tồn tại."
+                    })
+                }
+
+                // compare password with the existing in DB
+                bcrypt.compare(req.body.password, admin.password)
+                    .then((valid) => {
+                        if (!valid) {
+                            return res.status(401).send({
+                                message: "Hãy kiểm tra lại mật khẩu."
+                            })
+                        }
+
+                        // generate token
+                        const token = jwt.sign(
+                            { id: admin.id },
+                            'ADMIN_SEMO',
+                            { expiresIn: '24h' })
+
+                        res.status(200).json({
+                            token: token,
+                            admin: admin
+                        })
+                    })
+                    .catch((error) => {
+                        return res.status(500).send({
+                            message: error.message
+                        })
+                    })
+            })
+            .catch((error) => {
+                return res.status(500).json({
+                    message: error.message
+                })
+            })
+    })
+
+    // get admin
+    router.get('/admin', async (req, res, next) => {
+        let token = req.headers.token
+
+        jwt.verify(token, 'ADMIN_SEMO', (err, decoded) => {
+            // token is invalid
+            if (err) {
+                return res.status(401).json({
+                    title: 'Vui lòng đăng nhập lại.'
+                })
+            }
+
+            // token is valid
+            Admin.findOne({
+                where: {
+                    id: decoded.id
+                },
+            })
+                .then((admin) => {
+                    // wrong phone number
+                    if (!admin) {
+                        return res.status(401).send({
+                            message: "Người dùng không hợp lệ."
+                        })
+                    }
+
+                    res.status(200).json({
+                        admin: admin
+                    })
+                })
+                .catch((error) => {
+                    return res.status(500).json({
+                        error: error.message
+                    })
+                })
+        })
+    })
+
+    // HOME
+    // get info
+    router.get('/home', async (req, res) => {
+        // fruits
+        let fAll = await Fruit.count()
+
+        // products
+        let pAll = await Product.count()
+        let p0 = await Product.count({
+            where: {
+                product_status: 0
+            }
+        })
+        let p1 = await Product.count({
+            where: {
+                product_status: 1
+            }
+        })
+        let p2 = await Product.count({
+            where: {
+                product_status: 2
+            }
+        })
+        let p3 = await Product.count({
+            where: {
+                product_status: 3
+            }
+        })
+        let p4 = await Product.count({
+            where: {
+                product_status: 4
+            }
+        })
+        let p5 = await Product.count({
+            where: {
+                product_status: 5
+            }
+        })
+        let p9 = await Product.count({
+            where: {
+                product_status: 9
+            }
+        })
+
+        // users
+        let uAll = await User.count()
+
+        // auctions
+        let aAll = await Auction.count()
+        let a0 = await Auction.count({
+            where: {
+                auction_status: 0
+            }
+        })
+        let a1 = await Auction.count({
+            where: {
+                auction_status: 1
+            }
+        })
+        let a9 = await Auction.count({
+            where: {
+                auction_status: 9
+            }
+        })
+
+        // affairs
+        let afAll = await Affair.count()
+        let af0 = await Affair.count({
+            where: {
+                affair_status: 0
+            }
+        })
+        let af1 = await Affair.count({
+            where: {
+                affair_status: 1
+            }
+        })
+        let af2 = await Affair.count({
+            where: {
+                affair_status: 2
+            }
+        })
+        let af9 = await Affair.count({
+            where: {
+                affair_status: 9
+            }
+        })
+
+        // deposits
+        let dAll = await Deposit.count()
+
+        // transaction
+        let tAll = await Transaction.count()
+
+        // admins
+        let adAll = await Admin.count()
+
+        res.send({
+            fAll: fAll,
+            pAll: pAll,
+            p0: p0,
+            p1: p1,
+            p2: p2,
+            p3: p3,
+            p4: p4,
+            p5: p5,
+            p9: p9,
+            uAll: uAll,
+            aAll: aAll,
+            a0: a0,
+            a1: a1,
+            a9: a9,
+            afAll: afAll,
+            af0: af0,
+            af1: af1,
+            af2: af2,
+            af9: af9,
+            dAll: dAll,
+            tAll: tAll,
+            adAll: adAll
+        })
+    })
 
     // Review post by id
     router.get('/id/:id', async (req, res) => {
