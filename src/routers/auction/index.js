@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Address, ProductMedia }) => {
+const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Fruit, User, Address, ProductMedia }) => {
     const router = express.Router()
 
     function delay(ms) {
@@ -312,8 +312,26 @@ const createAuctionRouter = ({ Auction, Product, AuctionBid, Fruit, User, Addres
                     ['date_created', 'DESC']
                 ],
                 limit: 1
-            }).then(() => {
+            }).then(async () => {
                 console.log('auction closed')
+
+                let updatedAuction = await Auction.findOne({
+                    where: {
+                        product_id: req.body.id,
+                        auction_status: 0
+                    },
+                    order: [
+                        ['date_created', 'DESC']
+                    ],
+                    limit: 1
+                })
+
+                await Affair.create({
+                    product_id: req.body.id,
+                    buyer_user_id: updatedAuction.bidder_user_id,
+                })
+            }).catch(error => {
+                console.log(error)
             })
     })
 

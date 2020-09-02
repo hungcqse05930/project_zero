@@ -30,8 +30,6 @@ const createApp = async ({ database }) => {
 
     app.use(cors())
 
-    moment.tz.setDefault("Asia/Bangkok");
-
     // establish connection and authenticate it
     const models = await createModels(database)
 
