@@ -2,7 +2,7 @@
 const { createApp } = require('./src/app')
 
 const {
-    PORT = process.env.PORT || 3003,
+    PORT = 3003,
     HOST = '35.240.192.232',
     // HOST = '34.87.83.81',
     // HOST = 'localhost',
@@ -27,7 +27,7 @@ const appOptions = {
 createApp(appOptions)
     .then((app) => {
         // So we need to wrap the `app.listen` inside a `.then`
-        app.listen(PORT, () => {
+        app.listen(process.env.PORT || PORT, () => {
             console.info(`App is running at ${PORT}`)
             console.log(PORT);
         })
