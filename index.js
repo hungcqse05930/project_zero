@@ -29,6 +29,7 @@ createApp(appOptions)
         // So we need to wrap the `app.listen` inside a `.then`
         app.listen(PORT, () => {
             console.info(`App is running at ${PORT}`)
+            console.log(PORT);
         })
     })
 
