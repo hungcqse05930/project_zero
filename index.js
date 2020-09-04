@@ -2,7 +2,7 @@
 const { createApp } = require('./src/app')
 
 const {
-    PORT = 3003,
+    PORT = process.env.PORT || 3003,
     HOST = '35.240.192.232',
     // HOST = '34.87.83.81',
     // HOST = 'localhost',
