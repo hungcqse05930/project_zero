@@ -46,7 +46,7 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
     })
 
     // get amount of money one has to pay
-    router.get('/stats/:id/:wallet_id', async (req, res) => {
+    router.get('/stats/:wallet_id', async (req, res) => {
         // auction deposits (for sellers)
         Wallet.hasMany(Deposit, { foreignKey: 'src_wallet_id' })
         Deposit.belongsTo(Wallet, { foreignKey: 'src_wallet_id' })
@@ -82,21 +82,37 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
                 }
             ],
         }).then(result => {
-            res.send(result)
+            return sum
+        }).catch(() => {
+            return 0
+        })
+
+        res.send({
+            deposits: auctionDeposits,
+            bids: bids,
         })
 
         User.hasMany(AuctionBid, { foreignKey: 'bidder_user_id' })
     })
 
     router.get('/deposit/wallet/id/:id', async (req, res) => {
-        Wallet.hasMany(Deposit, { foreignKey: 'src_wallet_id' })
-        Deposit.belongsTo(Wallet, { foreignKey: 'src_wallet_id' })
+        Product.hasMany(Deposit, { foreignKey: 'deposit_id' })
+        Deposit.belongsTo(Product, { foreignKey: 'deposit_id' })
+
+
 
         await Deposit.findAll({
             where: {
                 src_wallet_id: req.params.id,
+                notes: 'Tien coc cho giao keo',
                 user_status: 0
-            }
+            },
+            include: [
+                {
+                    model: Product,
+                    required: true
+                }
+            ]
         }).then(deposits => {
             if (deposits.length > 0) {
                 res.send(deposits)

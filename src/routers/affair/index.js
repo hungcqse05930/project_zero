@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, AffairContractUpdate, Fruit, Product, ProductMedia, Auction, User }) => {
+const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, AffairContractUpdate, Deposit, Fruit, Product, ProductMedia, Auction, User }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -26,7 +26,7 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
 
     Affair.belongsTo(User, { as: 'buyer', foreignKey: 'buyer_user_id' })
     Affair.belongsTo(User, { as: 'seller', foreignKey: 'seller_user_id' })
-    
+
     // get all information for affair view
     router.get('/id/:id', async (req, res) => {
         Affair.belongsTo(Product, { foreignKey: 'product_id' })
@@ -41,11 +41,17 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
         Affair.hasOne(AffairContract, { foreignKey: 'affair_id' })
         AffairContract.belongsTo(Affair, { foreignKey: 'affair_id' })
 
+        AffairContract.hasMany(AffairContractUpdate, { foreignKey: 'affair_contract_id' })
+        AffairContractUpdate.belongsTo(AffairContract, { foreignKey: 'affair_contract_id' })
+
         Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
         Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
 
         Address.hasMany(Product, { foreignKey: 'address_id' })
         Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        Deposit.hasOne(Affair, { foreignKey: 'deposit_id' })
+        Affair.belongsTo(Deposit, { foreignKey: 'deposit_id' })
 
 
         await Affair.findOne({
@@ -76,21 +82,27 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
                     },
                     {
                         model: Fruit,
-                        required: true
+                        // required: true
                     },
                     {
                         model: Address,
-                        required: true
+                        // required: true
                     }
-                ]
+                    ]
                 },
                 {
                     model: AffairContract,
-                    attributes: [
-                        'id',
-                        'date_updated'
+                    include: [
+                        {
+                            model: AffairContractUpdate,
+                            order: [
+                                ['date_updated', 'DESC']
+                            ],
+                            limit: 1,
+                            required: false
+                        }
                     ],
-                    required: true
+                    // required: true
                 },
                 {
                     model: User,
@@ -115,6 +127,10 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
                     ],
                     as: 'seller',
                     required: true
+                },
+                {
+                    model: Deposit,
+                    // required: true
                 }
             ]
         })
@@ -127,13 +143,13 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
                 res.send(affair)
             })
             .catch(error => {
-                res.send(error)
+                res.status(500).send(error)
             })
     })
 
     AffairContract.belongsTo(User, { as: 'change_user', foreignKey: 'change_user_id' })
     AffairContract.belongsTo(User, { as: 'shipment_user', foreignKey: 'shipment_user_id' })
-    
+
     User.hasMany(AffairContractUpdate, { as: 'shipment_user', foreignKey: 'shipment_user_id' })
     AffairContractUpdate.belongsTo(User, { as: 'shipment_user', foreignKey: 'shipment_user_id' })
 
@@ -195,7 +211,7 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
             ]
         })
 
-        if(contract) {
+        if (contract) {
             res.send(contract)
         } else {
             res.status(404).send({
@@ -365,14 +381,14 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
                 id: req.body.id
             }
         })
-        .then(result => {
-            res.send({
-                message: 'Đã hủy giao kèo.'
+            .then(result => {
+                res.send({
+                    message: 'Đã hủy giao kèo.'
+                })
             })
-        })
-        .catch(error => {
-            res.status(500).send(error)
-        })
+            .catch(error => {
+                res.status(500).send(error)
+            })
     })
 
     // request update affair_contract for bider_user_id

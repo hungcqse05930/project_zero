@@ -3,11 +3,8 @@ const express = require('express')
 const { Sequelize, Op, QueryTypes } = require('sequelize')
 // middlewares
 const auth = require('../../middlewares/auth')
-const product = require('../product')
-const auction_bid = require('../auction_bid')
-const auction = require('../../models/auction')
 
-const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Fruit, User, Address, ProductMedia }) => {
+const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fruit, User, Address, ProductMedia, Wallet }) => {
     const router = express.Router()
 
     function delay(ms) {
@@ -301,6 +298,8 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Fruit, User
 
         let cur_date = new Date()
         await delay(Date.parse(req.body.date_closure) - cur_date.getTime())
+
+        // close auction
         await Auction.update({
             auction_status: 0
         },
@@ -313,8 +312,6 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Fruit, User
                 ],
                 limit: 1
             }).then(async () => {
-                console.log('auction closed')
-
                 let updatedAuction = await Auction.findOne({
                     where: {
                         product_id: req.body.id,
