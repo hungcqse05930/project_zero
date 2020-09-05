@@ -23,14 +23,22 @@ const { createTransactionModel } = require('./transaction')
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
     // establish a connection
-    const sequelize = new Sequelize(process.env.DATABASE_URL, {
-        host: dbHost,
-        dialect: 'mysql'
-    })
-    // const sequelize = new Sequelize(dbName, dbUser, dbPass, {
+    // const sequelize = new Sequelize(process.env.DATABASE_URL, {
     //     host: dbHost,
     //     dialect: 'mysql'
     // })
+    const path = require('path');
+    const sequelize = new Sequelize(dbName, dbUser, dbPass, {
+        host: dbHost,
+        dialect: 'mysql',
+        dialectOptions: {
+            ssl: {
+                key: require('fs').readFileSync(path.join(__dirname, 'client-key.pem')),
+                cert: require('fs').readFileSync(path.join(__dirname, 'client-cert.pem')),
+                ca: require('fs').readFileSync(path.join(__dirname, 'server-ca.pem')),
+            }
+        }
+    })
 
     // wait for authentication
     await sequelize.authenticate()
