@@ -456,6 +456,72 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
         }
     })
 
+    // change status of contract - ship and pay
+    router.put(`/contract/status`, async (req, res) => {
+        let contract = await AffairContract.findOne({
+            where: {
+                id: req.body.id
+            }
+        })
+
+        let newStatus = 0
+
+        if (contract.contract_status === 9) {
+            res.status(403).send({
+                message: 'Không thể cập nhật hợp đồng đã bị hủy. 😨'
+            })
+        } else if (contract.contract_status === 0) {
+            res.status(500).send({
+                message: 'Cần hoàn thành tiền cọc trước. 😴'
+            })
+        } else {
+            if (req.body.status === 'SHIP') {
+                if (contract.contract_status === 1) {
+                    newStatus = 2
+                } else if (contract.contract_status === 3) {
+                    newStatus = 4
+                } else {
+                    res.status(500).send({
+                        message: 'Yêu cầu không hợp lệ. 😡'
+                    })
+                }
+            } else if (req.body.status === 'PAY') {
+                if (contract.contract_status === 1) {
+                    newStatus = 3
+                } else if (contract.contract_status === 2) {
+                    newStatus = 4
+                } else {
+                    res.status(500).send({
+                        message: 'Yêu cầu không hợp lệ. 😡'
+                    })
+                }
+            } else {
+                res.status(500).send({
+                    message: 'Yêu cầu không hợp lệ. 😡'
+                })
+            }
+        }
+
+        await AffairContract.update({
+            contract_status: newStatus
+        }, {
+            where: {
+                id: req.body.id
+            }
+        })
+        .then(() => {
+            res.send({
+                contract_status: newStatus,
+                message: 'Tuyệt vời! 😍'
+            })
+        })
+        .catch(error => {
+            res.status(500).send({
+                message: 'Lỗi rồi, bạn thử lại sau nhé. 😥'
+            })
+        })
+    })
+
     // update status for affair admin xài
     router.put('/adminUpdate/:id', async (req, res) => {
         const updateStatus = await Affair.update({

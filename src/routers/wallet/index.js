@@ -1,11 +1,12 @@
 // library
 const express = require('express')
+const jwt = require('jsonwebtoken')
 const { Sequelize, Op, QueryTypes, Transaction } = require('sequelize')
 
 // middlewares
 const auth = require('../../middlewares/auth')
 
-const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid, Transaction, Deposit }) => {
+const createWalletRouter = ({ Wallet, User, Product, ProductMedia, Affair, Auction, AuctionBid, Transaction, Deposit }) => {
     const router = express.Router()
 
     //get wallet_amount by user_id
@@ -95,21 +96,61 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
         User.hasMany(AuctionBid, { foreignKey: 'bidder_user_id' })
     })
 
-    router.get('/deposit/wallet/id/:id', async (req, res) => {
-        Product.hasMany(Deposit, { foreignKey: 'deposit_id' })
-        Deposit.belongsTo(Product, { foreignKey: 'deposit_id' })
+    Deposit.hasOne(Auction, { as: 'auction', foreignKey: 'deposit_id' })
+    Auction.belongsTo(Deposit, { as: 'auction', foreignKey: 'deposit_id' })
 
+    Deposit.hasOne(Affair, { as: 'affair', foreignKey: 'deposit_id' })
+    Affair.belongsTo(Deposit, { as: 'affair', foreignKey: 'deposit_id' })
+
+    Product.hasMany(Auction, { foreignKey: 'product_id' })
+    Product.hasMany(Affair, { foreignKey: 'product_id' })
+
+    Auction.belongsTo(Product, { foreignKey: 'product_id' })
+    Affair.belongsTo(Product, { foreignKey: 'product_id' })
+
+    Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+    ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+    router.get('/deposit/wallet/id/:id', async (req, res) => {
         await Deposit.findAll({
             where: {
                 src_wallet_id: req.params.id,
-                notes: 'Tien coc cho giao keo',
-                user_status: 0
             },
             include: [
                 {
-                    model: Product,
-                    required: true
+                    model: Auction,
+                    include: [
+                        {
+                            model: Product,
+                            include: [
+                                {
+                                    model: ProductMedia,
+                                    limit: 1
+                                }
+                            ]
+                        }
+                    ],
+                    as: 'auction'
+                },
+                {
+                    model: Affair,
+                    include: [
+                        {
+                            model: Product,
+                            include: [
+                                {
+                                    model: ProductMedia,
+                                    limit: 1
+                                }
+                            ]
+                        }
+                    ],
+                    as: 'affair'
                 }
+            ],
+            order: [
+                ['user_status', 'ASC'],
+                ['date_created', 'DESC'],
             ]
         }).then(deposits => {
             if (deposits.length > 0) {
@@ -120,7 +161,6 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
                 })
             }
         }).catch(error => {
-            console.log(error)
             res.status(500).send(error)
         })
     })
@@ -178,13 +218,51 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
                 },
             ]
         })
-        .then(transactions => {
-            res.send(transactions)
+            .then(transactions => {
+                res.send(transactions)
+            })
+            .catch(error => {
+                console.log(error)
+                res.status(500).send(error)
+            })
+    })
+
+    router.put('/deposit/pay', async (req, res) => {
+        await Deposit.update({
+            user_status: 1
+        }, {
+            where: {
+                id: req.body.id
+            }
         })
-        .catch(error => {
-            console.log(error)
-            res.status(500).send(error)
-        })  
+            // token is valid
+
+            .then(async () => {
+                await Transaction.create({
+                    src_wallet_id: req.body.src_wallet_id,
+                    rcv_wallet_id: 54,
+                    amount: req.body.amount,
+                    notes: `Tra tien coc ${req.body.id}`
+                })
+                    .then(result => {
+                        res.send({
+                            message: 'Chuyển tiền cọc thành công. 😝'
+                        })
+                        ressolve(true)
+                    })
+                    .catch(error => {
+                        res.status(500).send({
+                            message: 'Lỗi rồi, bạn thử lại sau nhé. 😥',
+                            error: error
+                        })
+                    })
+            })
+            .catch(error => {
+                res.status(500).send({
+                    message: 'Lỗi rồi, bạn thử lại sau nhé. 😥',
+                    error: error
+                })
+            })
     })
 
     return router

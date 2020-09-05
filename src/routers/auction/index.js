@@ -271,18 +271,24 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
 
     // update date_closure after creation
     router.put('/create', async (req, res) => {
+        const auct = await Auction.findOne({
+            where: {
+                product_id: req.body.id,
+                auction_status: 1
+            },
+            order: [
+                ['date_created', 'DESC']
+            ]
+        })
+
         const auction = await Auction.update(
             {
                 date_closure: req.body.date_closure
             },
             {
                 where: {
-                    product_id: req.body.id
+                    id: auct.id
                 },
-                order: [
-                    ['date_created', 'DESC']
-                ],
-                limit: 1
             }
         )
 
@@ -305,17 +311,13 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
         },
             {
                 where: {
-                    product_id: req.body.id
+                    id: auct.id
                 },
-                order: [
-                    ['date_created', 'DESC']
-                ],
-                limit: 1
             })
             .then(async () => {
                 let updatedAuction = await Auction.findOne({
                     where: {
-                        product_id: req.body.id,
+                        id: auct.id,
                         auction_status: 0
                     },
                     order: [
