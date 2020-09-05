@@ -99,8 +99,6 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
         Product.hasMany(Deposit, { foreignKey: 'deposit_id' })
         Deposit.belongsTo(Product, { foreignKey: 'deposit_id' })
 
-
-
         await Deposit.findAll({
             where: {
                 src_wallet_id: req.params.id,
@@ -122,6 +120,7 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
                 })
             }
         }).catch(error => {
+            console.log(error)
             res.status(500).send(error)
         })
     })

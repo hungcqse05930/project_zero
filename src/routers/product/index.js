@@ -398,53 +398,6 @@ const createProductRouter = ({ Product, User, Auction, AuctionBid, Address, Prod
             Auction.hasMany(AuctionBid, { foreignKey: 'auction_id' })
             AuctionBid.belongsTo(Auction, { foreignKey: 'auction_id' })
 
-            // await Product.findAll({
-            //     where: Sequelize.literal(`Product.product_status = ${req.params.status}`),
-            //         // user_id: req.params.id
-            //     include: [
-            //         {
-            //             model: ProductMedia,
-            //             attributes: ['media_url'],
-            //             limit: 1,
-            //             required: true
-            //         },
-            //         {
-            //             model: Address,
-            //             attributes: ['province'],
-            //             required: true
-            //         },
-            //         {
-            //             model: Auction,
-            //             attributes: [
-            //                 'id',
-            //                 'views',
-            //                 [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_days'],
-            //                 [Sequelize.fn('timediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
-            //             ],
-            //             include: [
-            //                 {
-            //                     model: AuctionBid,
-            //                     attributes: [],
-            //                     where: {
-            //                         bidder_user_id: req.params.id
-            //                     },
-            //                     required: true,
-            //                 }
-            //             ],
-            //             order: [['date_created', 'DESC']],
-            //             limit: 1,
-            //             required: true,
-            //         },
-            //     ],
-            //     order: [['date_created', 'DESC']],
-            //     required: true
-            // }).then(fruits => {
-            //     res.send(fruits)
-            // })
-            // .catch(error => {
-            //     res.status(500).send(error)
-            // })
-
             await Auction.findAll({
                 where: {
                     auction_status: 1,
@@ -466,6 +419,9 @@ const createProductRouter = ({ Product, User, Auction, AuctionBid, Address, Prod
                     },
                     {
                         model: Product,
+                        where: {
+                            product_status: 3
+                        },
                         required: true,
                         include: [
                             {
@@ -503,6 +459,12 @@ const createProductRouter = ({ Product, User, Auction, AuctionBid, Address, Prod
                     {
                         model: Product,
                         required: true,
+                        where: {
+                            [Op.or]: [
+                                { product_status: 4 },
+                                { product_status: 5 }
+                            ]
+                        },
                         include: [
                             {
                                 model: ProductMedia,

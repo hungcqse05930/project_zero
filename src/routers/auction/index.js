@@ -297,8 +297,6 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
         }
 
         let cur_date = new Date()
-        console.log(cur_date.getTime())
-        console.log(Date.parse(req.body.date_closure))
         await delay(Date.parse(req.body.date_closure) + 1000 * 60 * 60 * 7 - cur_date.getTime())
 
         // close auction
@@ -313,7 +311,8 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
                     ['date_created', 'DESC']
                 ],
                 limit: 1
-            }).then(async () => {
+            })
+            .then(async () => {
                 let updatedAuction = await Auction.findOne({
                     where: {
                         product_id: req.body.id,
@@ -325,10 +324,38 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
                     limit: 1
                 })
 
-                await Affair.create({
-                    product_id: req.body.id,
-                    buyer_user_id: updatedAuction.bidder_user_id,
-                })
+                if (updatedAuction.bidder_user_id !== null) {
+
+                    let wallet = await Wallet.findOne({
+                        where: {
+                            user_id: updatedAuction.bidder_user_id
+                        }
+                    })
+
+                    await Deposit.create({
+                        product_id: req.body.id,
+                        src_wallet_id: wallet.id,
+                        notes: 'Tien coc cho giao keo',
+                    }).then(async () => {
+                        let deposit = await Deposit.findOne({
+                            where: {
+                                product_id: req.body.id,
+                                src_wallet_id: wallet.id,
+                            },
+                            order: [
+                                ['date_created', 'DESC']
+                            ]
+                        })
+
+
+
+                        await Affair.create({
+                            product_id: req.body.id,
+                            buyer_user_id: updatedAuction.bidder_user_id,
+                            deposit_id: deposit.id
+                        })
+                    })
+                }
             }).catch(error => {
                 console.log(error)
             })
