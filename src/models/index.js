@@ -23,10 +23,14 @@ const { createTransactionModel } = require('./transaction')
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
     // establish a connection
-    const sequelize = new Sequelize(dbName, dbUser, dbPass, {
+    const sequelize = new Sequelize(process.env.DATABASE_URL, {
         host: dbHost,
         dialect: 'mysql'
     })
+    // const sequelize = new Sequelize(dbName, dbUser, dbPass, {
+    //     host: dbHost,
+    //     dialect: 'mysql'
+    // })
 
     // wait for authentication
     await sequelize.authenticate()

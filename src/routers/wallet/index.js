@@ -95,23 +95,46 @@ const createWalletRouter = ({ Wallet, User, Product, Affair, Auction, AuctionBid
         User.hasMany(AuctionBid, { foreignKey: 'bidder_user_id' })
     })
 
+    Deposit.hasOne(Auction, { as: 'auction', foreignKey: 'deposit_id' })
+    Auction.belongsTo(Deposit, { as: 'auction', foreignKey: 'deposit_id' })
+
+    Deposit.hasOne(Affair, { as: 'affair', foreignKey: 'deposit_id' })
+    Affair.belongsTo(Deposit, { as: 'affair', foreignKey: 'deposit_id' })
+
+    Product.hasMany(Auction, { foreignKey: 'product_id' })
+    Product.hasMany(Affair, { foreignKey: 'product_id' })
+
+    Auction.belongsTo(Product, { foreignKey: 'product_id' })
+    Affair.belongsTo(Product, { foreignKey: 'product_id' })
+
     router.get('/deposit/wallet/id/:id', async (req, res) => {
-        Product.hasMany(Deposit, { foreignKey: 'deposit_id' })
-        Deposit.belongsTo(Product, { foreignKey: 'deposit_id' })
-
-
-
         await Deposit.findAll({
             where: {
                 src_wallet_id: req.params.id,
-                notes: 'Tien coc cho giao keo',
-                user_status: 0
             },
             include: [
                 {
-                    model: Product,
-                    required: true
+                    model: Auction,
+                    include: [
+                        {
+                            model: Product
+                        }
+                    ],
+                    as: 'auction'
+                },
+                {
+                    model: Affair,
+                    include: [
+                        {
+                            model: Product
+                        }
+                    ],
+                    as: 'affair'
                 }
+            ],
+            order: [
+                ['user_status', 'ASC'],
+                ['date_created', 'DESC'],
             ]
         }).then(deposits => {
             if (deposits.length > 0) {

@@ -25,6 +25,9 @@ const createAuctionModel = (sequelize) => {
         auction_status :{
             type: DataTypes.TINYINT
         },
+        deposit_id: {
+            type: DataTypes.BIGINT
+        },
         date_created: {
             type: 'TIMESTAMP'
         },

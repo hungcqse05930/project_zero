@@ -271,6 +271,8 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
 
     // update date_closure after creation
     router.put('/create', async (req, res) => {
+        console.log(req.body.date_closure)
+
         const auction = await Auction.update(
             {
                 date_closure: req.body.date_closure
@@ -297,8 +299,12 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
         }
 
         let cur_date = new Date()
+        console.log('date: ' + req.body.date_closure)
+        console.log('date closure: ' + new Date(req.body.date_closure))
+        console.log('date now: ' + cur_date)
         await delay(Date.parse(req.body.date_closure) - cur_date.getTime())
 
+        console.log('auction closed')
         // close auction
         await Auction.update({
             auction_status: 0
@@ -323,10 +329,31 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
                     limit: 1
                 })
 
-                await Affair.create({
-                    product_id: req.body.id,
-                    buyer_user_id: updatedAuction.bidder_user_id,
-                })
+                if (updatedAuction.bidder_user_id !== null) {
+
+                    let wallet = await Wallet.findOne({
+                        where: {
+                            user_id: updatedAuction.bidder_user_id
+                        }
+                    })
+
+                    await Deposit.create({
+                        product_id: req.body.id,
+                        src_wallet_id: wallet.id,
+                        notes: 'Tien coc cho giao keo',
+                    })
+
+                    let deposit = await Deposit.findOne({
+                        product_id: req.body.id,
+                        src_wallet_id: wallet.id,
+                    })
+
+                    await Affair.create({
+                        product_id: req.body.id,
+                        buyer_user_id: updatedAuction.bidder_user_id,
+                        deposit_id: deposit.id
+                    })
+                }
             }).catch(error => {
                 console.log(error)
             })
