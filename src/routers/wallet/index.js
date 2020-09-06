@@ -244,31 +244,43 @@ const createWalletRouter = ({ Wallet, User, Product, ProductMedia, Affair, Aucti
                     notes: `Tra tien coc ${req.body.id}`
                 })
 
-                let affair = await Affair.findOne({
+                let depo = await Deposit.findOne({
                     where: {
-                        deposit_id: req.body.id
+                        id: req.body.id
                     }
                 })
 
-                await AffairContract.update({
-                    contract_status: 1,
-                }, {
-                    where: {
-                        affair_id: affair.id
-                    }
-                })
-                    .then(result => {
-                        res.send({
-                            message: 'Chuyển tiền cọc thành công. 😝'
-                        })
-                        ressolve(true)
+                if (depo.notes === 'Tien coc cho giao keo') {
+                    let affair = await Affair.findOne({
+                        where: {
+                            deposit_id: req.body.id
+                        }
                     })
-                    .catch(error => {
-                        res.status(500).send({
-                            message: 'Lỗi rồi, bạn thử lại sau nhé. 😥',
-                            error: error
-                        })
+
+                    await AffairContract.update({
+                        contract_status: 1,
+                    }, {
+                        where: {
+                            affair_id: affair.id
+                        }
                     })
+                        .then(result => {
+                            res.send({
+                                message: 'Chuyển tiền cọc thành công. 😝'
+                            })
+                            ressolve(true)
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Lỗi rồi, bạn thử lại sau nhé. 😥',
+                                error: error
+                            })
+                        })
+                } else {
+                    res.send({
+                        message: 'Chuyển tiền cọc thành công. 😝'
+                    })
+                }
             })
             .catch(error => {
                 res.status(500).send({
