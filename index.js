@@ -2,15 +2,15 @@
 const { createApp } = require('./src/app')
 
 const {
-    PORT = 3003,
-    HOST = '35.240.192.232',
+    PORT = 3306,
+    HOST = '34.92.127.114',
     // HOST = '34.87.83.81',
     // HOST = 'localhost',
-    DB_USER = 'tddakk',
+    DB_USER = 'dbuser',
     // DB_USER = 'root',
     // DB_PASS = '0mqMw0Gis8I5zi2v',
-    DB_PASS = '123456',
-    DB_NAME = 'semo_2.0',
+    DB_PASS = '123@123a',
+    DB_NAME = 'semo',
 } = process.env
 
 // by doing this, app needs not to be initiated first, we can put vars into it
