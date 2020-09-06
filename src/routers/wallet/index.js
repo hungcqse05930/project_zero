@@ -203,27 +203,26 @@ const createWalletRouter = ({ Wallet, User, Product, ProductMedia, Affair, Aucti
                         where: {
                             deposit_id: req.body.id
                         }
-                    })
-
-                    await AffairContract.update({
-                        contract_status: 1,
-                    }, {
-                        where: {
-                            affair_id: affair.id
-                        }
-                    })
-                        .then(result => {
-                            res.send({
-                                message: 'Chuyển tiền cọc thành công. 😝'
-                            })
-                            ressolve(true)
+                    }).then(async (affair) => {
+                        await AffairContract.update({
+                            contract_status: 1,
+                        }, {
+                            where: {
+                                affair_id: affair.id
+                            }
                         })
-                        .catch(error => {
-                            res.status(500).send({
-                                message: 'Lỗi rồi, bạn thử lại sau nhé. 😥',
-                                error: error
+                            .then(result => {
+                                res.send({
+                                    message: 'Chuyển tiền cọc thành công. 😝'
+                                })
                             })
-                        })
+                            .catch(error => {
+                                res.status(500).send({
+                                    message: 'Lỗi rồi, bạn thử lại sau nhé. 😥',
+                                    error: error
+                                })
+                            })
+                    })
                 } else {
                     res.send({
                         message: 'Chuyển tiền cọc thành công. 😝'
