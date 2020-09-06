@@ -7,7 +7,7 @@ const product = require('../product')
 const auction_bid = require('../auction_bid')
 const auction = require('../../models/auction')
 
-const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, AffairContractUpdate, Deposit, Fruit, Product, ProductMedia, Auction, User }) => {
+const createAffairRouter = ({ Address, Affair, Transaction, AffairChat, AffairContract, AffairContractUpdate, Deposit, Fruit, Product, ProductMedia, Auction, User, Wallet }) => {
     const router = express.Router()
 
     // Lấy các chat thuộc affair_id xếp theo thứ tự giảm dần theo thời gian, load 12 bản ghi mỗi lần.
@@ -372,13 +372,49 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
         }
     })
 
-    // cancel affair
-    router.put('/cancel', async (req, res) => {
+    // complete affair
+    router.put(`/complete`, async (req, res) => {
+        console.log(req.body.id)
         await Affair.update({
-            affair_status: req.body.affair_status
+            affair_status: 2
         }, {
             where: {
                 id: req.body.id
+            }
+        })
+
+        await AffairContract.update({
+            contract_status: 5
+        }, {
+            where: {
+                affair_id: req.body.id
+            }
+        })
+            .then(result => {
+                res.send({
+                    message: 'Đã hoàn thành giao kèo.'
+                })
+            })
+            .catch(error => {
+                res.status(500).send(error)
+            })
+    })
+
+    // cancel affair
+    router.put('/cancel', async (req, res) => {
+        await Affair.update({
+            affair_status: 9
+        }, {
+            where: {
+                id: req.body.id
+            }
+        })
+
+        await AffairContract.update({
+            contract_status: 9
+        }, {
+            where: {
+                affair_id: req.body.id
             }
         })
             .then(result => {
@@ -519,6 +555,30 @@ const createAffairRouter = ({ Address, Affair, AffairChat, AffairContract, Affai
             res.status(500).send({
                 message: 'Lỗi rồi, bạn thử lại sau nhé. 😥'
             })
+        })
+    })
+
+
+    router.post('/transact', async (req, res) => {
+        const rcv_wallet = await Wallet.findOne({
+            where: {
+                user_id: req.body.rcv_user_id
+            }
+        })
+
+        await Transaction.create({
+            src_wallet_id: req.body.src_wallet_id,
+            rcv_wallet_id: rcv_wallet.id,
+            amount: req.body.amount,
+            notes: req.body.notes
+        })
+        .then(() => {
+            res.status(201).send({
+                message: 'Đã thanh toán thành công. 😝'
+            })
+        })
+        .catch(error => {
+            res.status(500).send(error)
         })
     })
 

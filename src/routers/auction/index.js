@@ -349,8 +349,6 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
                             ]
                         })
 
-
-
                         await Affair.create({
                             product_id: req.body.id,
                             buyer_user_id: updatedAuction.bidder_user_id,
@@ -394,6 +392,9 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
         Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
         ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
 
+        Deposit.hasOne(Auction, { foreignKey: 'deposit_id' })
+        Auction.belongsTo(Deposit, { foreignKey: 'deposit_id' })
+
         // offset: number of records you skip
         // const offset = Number.parseInt(req.query.offset) || 0
         // limit: number of records you get
@@ -420,6 +421,11 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
                         [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_days'],
                         [Sequelize.fn('timediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
                         'auction_status'
+                    ],
+                    include: [
+                        {
+                            model: Deposit,
+                        }
                     ],
                     required: true,
                 }, {

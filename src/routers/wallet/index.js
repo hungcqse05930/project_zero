@@ -6,7 +6,7 @@ const { Sequelize, Op, QueryTypes, Transaction } = require('sequelize')
 // middlewares
 const auth = require('../../middlewares/auth')
 
-const createWalletRouter = ({ Wallet, User, Product, ProductMedia, Affair, Auction, AuctionBid, Transaction, Deposit }) => {
+const createWalletRouter = ({ Wallet, User, Product, ProductMedia, Affair, Auction, AuctionBid, AffairContract, Transaction, Deposit }) => {
     const router = express.Router()
 
     //get wallet_amount by user_id
@@ -236,13 +236,26 @@ const createWalletRouter = ({ Wallet, User, Product, ProductMedia, Affair, Aucti
             }
         })
             // token is valid
-
             .then(async () => {
                 await Transaction.create({
                     src_wallet_id: req.body.src_wallet_id,
                     rcv_wallet_id: 54,
                     amount: req.body.amount,
                     notes: `Tra tien coc ${req.body.id}`
+                })
+
+                let affair = await Affair.findOne({
+                    where: {
+                        deposit_id: req.body.id
+                    }
+                })
+
+                await AffairContract.update({
+                    contract_status: 1,
+                }, {
+                    where: {
+                        affair_id: affair.id
+                    }
                 })
                     .then(result => {
                         res.send({
