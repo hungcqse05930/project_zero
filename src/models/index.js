@@ -20,6 +20,8 @@ const { createAffairContractModel } = require('./affair_contract')
 const { createAffairContractUpdateModel } = require('./affair_contract_update')
 const { createDepositModel } = require('./deposit')
 const { createTransactionModel } = require('./transaction')
+const { createAffairRatingModel } = require('./affair_rating')
+
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
     // establish a connection
@@ -38,6 +40,7 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         AffairChat : createAffairChatModel (sequelize),
         AffairContract : createAffairContractModel (sequelize),
         AffairContractUpdate: createAffairContractUpdateModel (sequelize),
+        AffairRating: createAffairRatingModel(sequelize),
         Auction : createAuctionModel (sequelize),
         AuctionBid : createAuctionBidModel (sequelize),
         Collection : createCollectionModel(sequelize),

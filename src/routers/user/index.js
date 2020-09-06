@@ -10,7 +10,7 @@ const auth = require('../../middlewares/auth')
 // const { where } = require('sequelize/types')
 // const { Model } = require('sequelize/types')
 
-const createUserRouter = ({ User, Product, Address, Wallet }) => {
+const createUserRouter = ({ User, Product, Address, AffairRating, Auction, Fruit, Wallet, ProductMedia }) => {
     const router = express.Router()
 
     // === BEFORE LOGIN ===
@@ -203,7 +203,8 @@ const createUserRouter = ({ User, Product, Address, Wallet }) => {
 
         const user = await User.findOne({
             attributes: ['phone', 'name', 'gender', 'dob', 'img_url', 'rate',
-                [Sequelize.fn('timestampdiff', Sequelize.literal('month'), Sequelize.col('User.date_created'), Sequelize.literal('CURRENT_TIMESTAMP')), 'membership']],
+                [Sequelize.fn('timestampdiff', Sequelize.literal('month'), Sequelize.col('User.date_created'), Sequelize.literal('CURRENT_TIMESTAMP')), 'membership']
+            ],
             where: { id: req.params.id },
             include: [{
                 model: Address,
@@ -217,6 +218,23 @@ const createUserRouter = ({ User, Product, Address, Wallet }) => {
         } else {
             res.sendStatus(404)
         }
+    })
+
+    router.post('/feedback', async (req, res) => {
+        await AffairRating.create({
+            rater_user_id: req.body.rater_user_id,
+            rated_user_id: req.body.rated_user_id,
+            rate: req.body.point,
+            description: req.body.description
+        })
+            .then(() => {
+                res.send({
+                    message: 'Cảm ơn bạn rất nhiều. 🥰'
+                })
+            })
+            .catch(error => {
+                res.status(500).send(error)
+            })
     })
 
     // get user_name by user_id from (product) 
@@ -310,28 +328,6 @@ const createUserRouter = ({ User, Product, Address, Wallet }) => {
         }
     })
 
-    // //get aution_id by product_id
-    // router.get('/', async (req, res) => {
-    //     // find by primary key = find by id
-    //     const auctions = await Auction.findAll(
-    //         { attributes: ['id'] },
-    //         { where: { product_id: req.params.id } },
-    //         {
-    //             include: [
-    //                 {
-    //                     model: Product,
-    //                     required: false,
-    //                 }]
-    //         }
-    //     ).then(auctions => {
-    //         if (auctions) {
-    //             res.send(auctions)
-    //         } else {
-    //             res.sendStatus(404)
-    //         }
-    //     });
-    // })
-
     // Search nguoi dung lien quan
     router.get('/search/:name', async (req, res) => {
         User.hasMany(Address, { foreignKey: 'user_id' })
@@ -355,6 +351,7 @@ const createUserRouter = ({ User, Product, Address, Wallet }) => {
         }
     })
 
+    // change password
     router.put('/password/:id', async (req, res) => {
         User.findOne({
             where: {
@@ -393,6 +390,77 @@ const createUserRouter = ({ User, Product, Address, Wallet }) => {
                         error: error
                     })
                 })
+        })
+    })
+
+    // user profile
+    router.get('/profile/:id', async (req, res) => {
+        User.hasMany(Address, { foreignKey: 'user_id' })
+        Address.belongsTo(User, { foreignKey: 'user_id' })
+
+        User.hasMany(Product, { foreignKey: 'user_id' })
+        Product.belongsTo(User, { foreignKey: 'user_id' })
+
+        Product.hasMany(Auction, { foreignKey: 'product_id' })
+        Auction.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Fruit.hasMany(Product, { foreignKey: 'fruit_id' })
+        Product.belongsTo(Fruit, { foreignKey: 'fruit_id' })
+
+        const products = await Auction.findAll({
+            attributes: ['id', 'price_cur', 'views',
+                [Sequelize.fn('timediff', Sequelize.col('Auction.date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain_time'],
+                [Sequelize.fn('datediff', Sequelize.col('date_closure'), Sequelize.literal('CURRENT_TIMESTAMP')), 'remain']],
+            where: { auction_status: 1 },
+            include: [{
+                model: Product,
+                attributes: ['title', 'id', 'weight', 'fruit_id'],
+                where: {
+                    user_id: req.params.id
+                },
+                required: true,
+                include: [
+                    {
+                        model: Address,
+                        attributes: ['province'],
+                        required: true
+                    },
+                    {
+                        model: ProductMedia,
+                        attributes: ['media_url'],
+                        required: true
+                    }]
+            }]
+        })
+
+        const user = await User.findOne({
+            where: {
+                id: req.params.id
+            },
+            attributes: {
+                include: [
+                    [Sequelize.fn('timestampdiff', Sequelize.literal('month'), Sequelize.col('User.date_created'), Sequelize.literal('CURRENT_TIMESTAMP')), 'membership']
+                ]
+            },
+            include: [
+                {
+                    model: Address,
+                    where: {
+                        default_address: 1
+                    }
+                }
+            ]
+        })
+
+        res.send({
+            user: user,
+            auctions: products
         })
     })
 

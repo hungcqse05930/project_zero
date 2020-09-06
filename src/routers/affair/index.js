@@ -53,7 +53,6 @@ const createAffairRouter = ({ Address, Affair, Transaction, AffairChat, AffairCo
         Deposit.hasOne(Affair, { foreignKey: 'deposit_id' })
         Affair.belongsTo(Deposit, { foreignKey: 'deposit_id' })
 
-
         await Affair.findOne({
             where: {
                 id: req.params.id
