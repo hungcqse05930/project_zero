@@ -303,10 +303,6 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
         }
 
         let cur_date = new Date()
-        console.log(`Closure raw : ${Date.parse(req.body.date_closure)}`)
-        console.log(`Date closure: ${Date.parse(req.body.date_closure)}`)
-        console.log(`Time now:     ${cur_date.getTime()}`)
-        console.log(`Elapsed time: ${Date.parse(req.body.date_closure) - cur_date.getTime()} ms`)
         await delay(Date.parse(req.body.date_closure) - cur_date.getTime())
 
         // close auction
