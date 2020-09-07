@@ -303,7 +303,10 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
         }
 
         let cur_date = new Date()
-        console.log('timediff: ' + Date.parse(req.body.date_closure) + 1000 * 60 * 60 * 7 - cur_date.getTime())
+        console.log(`Closure raw : ${Date.parse(req.body.date_closure)}`)
+        console.log(`Date closure: ${Date.parse(req.body.date_closure) + 1000 * 60 * 60 * 7}`)
+        console.log(`Time now:     ${cur_date.getTime()}`)
+        console.log(`Elapsed time: ${Date.parse(req.body.date_closure) + 1000 * 60 * 60 * 7 - cur_date.getTime()} ms`)
         await delay(Date.parse(req.body.date_closure) + 1000 * 60 * 60 * 7 - cur_date.getTime())
 
         // close auction
@@ -317,7 +320,7 @@ const createAuctionRouter = ({ Auction, Affair, Product, AuctionBid, Deposit, Fr
             })
             .then(async () => {
                 console.log('auction closed')
-                
+
                 let updatedAuction = await Auction.findOne({
                     where: {
                         id: auct.id,
