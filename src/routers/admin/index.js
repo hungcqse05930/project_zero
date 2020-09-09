@@ -16,7 +16,7 @@ const { Sequelize, Transaction } = require('sequelize')
 
 
 
-const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address, Transaction, AffairContractUpdate }) => {
+const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, TransactionRequest, Address, Transaction, AffairContractUpdate, Wallet }) => {
     const router = express.Router()
 
     // LOG IN
@@ -781,19 +781,29 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
     // TRANSACTION_REQUEST
     // get all request
     router.get('/transaction/requests', async (req, res) => {
-        User.hasOne(Identity, { foreignKey: 'user_id' })
-        Identity.belongsTo(User, { foreignKey: 'user_id' })
+        Wallet.hasMany(TransactionRequest, { foreignKey: 'src_wallet_id' })
+        TransactionRequest.belongsTo(Wallet, { foreignKey: 'src_wallet_id' })
 
-        await Identity.findAll({
+        User.hasOne(Wallet, { foreignKey: 'user_id' })
+        Wallet.belongsTo(User, { foreignKey: 'user_id' })
+
+        await TransactionRequest.findAll({
             order: [
                 ['date_created', 'DESC']
             ],
             include: [
                 {
-                    model: User,
-                    attributes: [
-                        'name',
-                        'img_url'
+                    model: Wallet,
+                    attributes: [],
+                    include: [
+                        {
+                            model: User,
+                            attributes: [
+                                'name',
+                                'img_url'
+                            ],
+                            required: true
+                        }
                     ],
                     required: true,
                 }
