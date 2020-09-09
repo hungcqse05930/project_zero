@@ -6,7 +6,7 @@ const { Sequelize, Op, QueryTypes, Transaction } = require('sequelize')
 // middlewares
 const auth = require('../../middlewares/auth')
 
-const createWalletRouter = ({ Wallet, User, Product, ProductMedia, Affair, Auction, AuctionBid, AffairContract, Transaction, Deposit }) => {
+const createWalletRouter = ({ Wallet, User, Product, ProductMedia, Affair, Auction, AuctionBid, AffairContract, Transaction, Deposit, TransactionRequest }) => {
     const router = express.Router()
 
     //get wallet_amount by user_id
@@ -29,14 +29,14 @@ const createWalletRouter = ({ Wallet, User, Product, ProductMedia, Affair, Aucti
 
     // update wallet_amount by wallet_id
     router.post('/topUp', async (req, res) => {
-        await Transaction.create({
-            rcv_wallet_id: req.body.id,
+        await TransactionRequest.create({
+            id: req.body.id,
+            src_wallet_id: req.body.src_wallet_id,
             amount: req.body.amount,
-            notes: `Nap tien cho vi ${req.body.id}`
         }).then(result => {
             if (result) {
                 res.send({
-                    message: 'Nạp tiền thành công! 🤑'
+                    message: 'Yêu cầu nạp tiền thành công! 🤑'
                 })
             } else {
                 res.send({

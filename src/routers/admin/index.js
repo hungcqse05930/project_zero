@@ -16,7 +16,7 @@ const { Sequelize, Transaction } = require('sequelize')
 
 
 
-const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address, Transaction }) => {
+const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product, Fruit, ProductUpdateRequest, User, ProductMedia, Collection, CollectionAuction, Address, Transaction, AffairContractUpdate }) => {
     const router = express.Router()
 
     // LOG IN
@@ -688,6 +688,47 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
             })
     })
 
+    User.hasMany(AffairContractUpdate, { as: 'ship', foreignKey: 'shipment_user_id' })
+    AffairContractUpdate.belongsTo(User, { as: 'ship', foreignKey: 'shipment_user_id' })
+    User.hasMany(AffairContractUpdate, { as: 'change', foreignKey: 'change_user_id' })
+    AffairContractUpdate.belongsTo(User, { as: 'change', foreignKey: 'change_user_id' })
+
+    // get all contract updates of one contract
+    router.get('/contract/:id/updates', async (req, res) => {
+        await AffairContractUpdate.findAll({
+            where: {
+                affair_contract_id: req.params.id
+            },
+            attributes: {
+                include: [
+                    [Sequelize.col('ship.name'), 'shipment_user'],
+                    [Sequelize.col('change.name'), 'change_user'],
+                ]
+            },
+            include: [
+                {
+                    model: User,
+                    attributes: [],
+                    as: 'ship',
+                },
+                {
+                    model: User,
+                    attributes: [],
+                    as: 'change'
+                }
+            ],
+            order: [
+                ['date_updated', 'DESC']
+            ]
+        })
+        .then(updates => {
+            res.send(updates)
+        })
+        .catch(error => {
+            res.status(500).send(error)
+        })
+    })
+
     // IDENTITY
     // get all identities
     router.get('/identity', async (req, res) => {
@@ -733,6 +774,35 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
                 })
             })
             .catch((error) => {
+                res.status(500).send(error)
+            })
+    })
+
+    // TRANSACTION_REQUEST
+    // get all request
+    router.get('/transaction/requests', async (req, res) => {
+        User.hasOne(Identity, { foreignKey: 'user_id' })
+        Identity.belongsTo(User, { foreignKey: 'user_id' })
+
+        await Identity.findAll({
+            order: [
+                ['date_created', 'DESC']
+            ],
+            include: [
+                {
+                    model: User,
+                    attributes: [
+                        'name',
+                        'img_url'
+                    ],
+                    required: true,
+                }
+            ],
+        })
+            .then(identities => {
+                res.send(identities)
+            })
+            .catch(error => {
                 res.status(500).send(error)
             })
     })

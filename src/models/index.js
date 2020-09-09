@@ -21,6 +21,7 @@ const { createAffairContractUpdateModel } = require('./affair_contract_update')
 const { createDepositModel } = require('./deposit')
 const { createTransactionModel } = require('./transaction')
 const { createAffairRatingModel } = require('./affair_rating')
+const { createTransactionRequestModel } = require('./transaction_request')
 
 // like entities
 const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
@@ -55,6 +56,7 @@ const createModels = async ({ dbName, dbUser, dbPass, dbHost }) => {
         ProductUpdateRequest : createProductUpdateRequestModel(sequelize),
         User: createUserModel(sequelize),
         Transaction: createTransactionModel(sequelize),
+        TransactionRequest: createTransactionRequestModel(sequelize),
         Wallet : createWalletModel (sequelize),
     }
 }
