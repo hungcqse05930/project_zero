@@ -220,6 +220,65 @@ const createUserRouter = ({ User, Product, Address, AffairRating, Auction, Fruit
         }
     })
 
+    // router.get('/search/:title', async (req, res) => {
+    //     User.hasMany(Address, { foreignKey: 'user_id' })
+    //     Address.belongsTo(User, { foreignKey: 'user_id' })
+
+    //     console.log(req.params.title)
+
+    //     let users = await User.findAll({
+    //         where: {
+    //             name: { [Op.like]: '%' + req.params.title + '% '}
+    //         },
+    //         include: [
+    //             {
+    //                 model: Address,
+    //                 where: {
+    //                     default_address: 1
+    //                 },
+    //                 required: false,
+    //             }
+    //         ]
+    //     })
+
+    //     if (users) {
+    //         res.send(users)
+    //     } else {
+    //         res.status(404)
+    //     }
+    // })
+
+    // get all feedbacks
+    router.get('/feedbacks/:id', async (req, res) => {
+        User.hasMany(AffairRating, { foreignKey: 'rater_user_id'})
+        AffairRating.belongsTo(User, { foreignKey: 'rater_user_id'})
+
+        await AffairRating.findAll({
+            where: {
+                rated_user_id: req.params.id
+            },
+            include: [
+                {
+                    model: User,
+                    required: true,
+                }
+            ],
+            order: [
+                ['date_created', 'DESC']
+            ]
+        })
+            .then(feedbacks => {
+                if (feedbacks.length > 0) {
+                    res.send(feedbacks)
+                } else {
+                    res.send([])
+                }
+            })
+            .catch(error => {
+                res.status(500).send(error)
+            })
+    })
+
     router.post('/feedback', async (req, res) => {
         await AffairRating.create({
             rater_user_id: req.body.rater_user_id,
@@ -333,16 +392,20 @@ const createUserRouter = ({ User, Product, Address, AffairRating, Auction, Fruit
         Address.belongsTo(User, { foreignKey: 'user_id' })
 
         const users = await User.findAll({
-            attributes: ['name', 'img_url', 'rate'],
+            attributes: ['id', 'name', 'img_url', 'rate'],
             include: [{
                 model: Address,
                 attributes: ['province'],
-                required: true
+                required: true,
+                where: {
+                    default_address: 1
+                }
             }],
             where: {
                 name: { [Op.like]: '%' + req.params.name + '%' }
             },
         })
+        
         if (users) {
             res.send(users)
         } else {
