@@ -224,7 +224,7 @@ const createUserRouter = ({ User, Product, Address, AffairRating, Auction, Fruit
         await AffairRating.create({
             rater_user_id: req.body.rater_user_id,
             rated_user_id: req.body.rated_user_id,
-            rate: req.body.point,
+            rate: req.body.rate,
             description: req.body.description
         })
             .then(() => {
