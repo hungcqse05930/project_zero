@@ -259,7 +259,6 @@ const createUserRouter = ({ User, Product, Address, AffairRating, Auction, Fruit
         // find by primary key = find by id
         const user = await User.findOne(
             {
-                attributes: ['name', 'phone', 'name', 'dob', 'gender'],
                 where: { id: req.params.id }
             })
         if (user) {
