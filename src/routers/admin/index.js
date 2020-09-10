@@ -846,6 +846,93 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
         })
     })
 
+    // DEPOSITS
+    // get all deposits
+    
+    router.get('/deposits', async (req, res) => {
+        Product.hasMany(Deposit, { foreignKey: 'product_id'})
+        Deposit.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Wallet.hasOne(Deposit, { foreignKey: 'src_wallet_id' })
+        Deposit.belongsTo(Wallet, { foreignKey: 'src_wallet_id' })
+        
+        User.hasOne(Wallet, { foreignKey: 'user_id' })
+        Wallet.belongsTo(User, { foreignKey: 'user_id' })
+
+        await Product.findAll({
+            include: [
+                {
+                    model: Deposit,
+                    include: [
+                        {
+                            model : Wallet,
+                            include: [
+                                {
+                                    model: User
+                                }
+                            ]
+                        }
+                    ],
+                    order: [
+                        ['date_created', 'DESC']
+                    ],
+                    required: true
+                }
+            ],
+            order: [
+                ['date_created', 'DESC']
+            ]
+        })
+        .then(products => {
+            res.send(products)
+        })
+        .catch(error => {
+            res.status(500).send(error)
+        })
+    })
+
+    // get all deposits from one product
+    router.get('/deposit/id/:pid', async (req, res) => {
+        Product.hasMany(Deposit, { foreignKey: 'product_id'})
+        Deposit.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Wallet.hasOne(Deposit, { foreignKey: 'src_wallet_id' })
+        Deposit.belongsTo(Wallet, { foreignKey: 'src_wallet_id' })
+        
+        User.hasOne(Wallet, { foreignKey: 'user_id' })
+        Wallet.belongsTo(User, { foreignKey: 'user_id' })
+
+        await Product.findOne({
+            where: {
+                id: req.params.pid
+            },
+            include: [
+                {
+                    model: Deposit,
+                    include: [
+                        {
+                            model : Wallet,
+                            include: [
+                                {
+                                    model: User
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            order: [
+                ['date_created', 'DESC']
+            ]
+        })
+        .then(products => {
+            res.send(products)
+        })
+        .catch(error => {
+            res.status(500).send(error)
+        })
+    })
+
     return router
 }
 
