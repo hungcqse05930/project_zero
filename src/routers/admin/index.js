@@ -829,43 +829,43 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
                 id: req.body.id
             }
         })
-        .then(result => {
-            result[0] === 1 ?
-            res.send({
-                message: 'Thành công.'
+            .then(result => {
+                result[0] === 1 ?
+                    res.send({
+                        message: 'Thành công.'
+                    })
+                    :
+                    res.status(500).send({
+                        message: 'Thất bại.'
+                    })
             })
-            :
-            res.status(500).send({
-                message: 'Thất bại.'
+            .catch(error => {
+                res.status(500).send({
+                    message: error.message
+                })
             })
-        })
-        .catch(error => {
-            res.status(500).send({
-                message: error.message
-            })
-        })
     })
 
     // DEPOSITS
     // get all deposits
-    
     router.get('/deposits', async (req, res) => {
-        Product.hasMany(Deposit, { foreignKey: 'product_id'})
+        Product.hasMany(Deposit, { foreignKey: 'product_id' })
         Deposit.belongsTo(Product, { foreignKey: 'product_id' })
 
         Wallet.hasOne(Deposit, { foreignKey: 'src_wallet_id' })
         Deposit.belongsTo(Wallet, { foreignKey: 'src_wallet_id' })
-        
+
         User.hasOne(Wallet, { foreignKey: 'user_id' })
         Wallet.belongsTo(User, { foreignKey: 'user_id' })
 
+        
         await Product.findAll({
             include: [
                 {
                     model: Deposit,
                     include: [
                         {
-                            model : Wallet,
+                            model: Wallet,
                             include: [
                                 {
                                     model: User
@@ -883,24 +883,31 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
                 ['date_created', 'DESC']
             ]
         })
-        .then(products => {
-            res.send(products)
-        })
-        .catch(error => {
-            res.status(500).send(error)
-        })
+            .then(products => {
+                res.send(products)
+            })
+            .catch(error => {
+                res.status(500).send(error)
+            })
     })
 
     // get all deposits from one product
     router.get('/deposit/id/:pid', async (req, res) => {
-        Product.hasMany(Deposit, { foreignKey: 'product_id'})
+        Product.hasMany(Deposit, { foreignKey: 'product_id' })
         Deposit.belongsTo(Product, { foreignKey: 'product_id' })
 
         Wallet.hasOne(Deposit, { foreignKey: 'src_wallet_id' })
         Deposit.belongsTo(Wallet, { foreignKey: 'src_wallet_id' })
-        
+
         User.hasOne(Wallet, { foreignKey: 'user_id' })
         Wallet.belongsTo(User, { foreignKey: 'user_id' })
+
+        Product.hasMany(ProductMedia, { foreignKey: 'product_id' })
+        ProductMedia.belongsTo(Product, { foreignKey: 'product_id' })
+
+        Address.hasMany(Product, { foreignKey: 'address_id' })
+        Product.belongsTo(Address, { foreignKey: 'address_id' })
+
 
         await Product.findOne({
             where: {
@@ -908,10 +915,17 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
             },
             include: [
                 {
+                    model: ProductMedia,
+                    limit: 1
+                },
+                {
+                    model: Address,
+                },
+                {
                     model: Deposit,
                     include: [
                         {
-                            model : Wallet,
+                            model: Wallet,
                             include: [
                                 {
                                     model: User
@@ -925,11 +939,36 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
                 ['date_created', 'DESC']
             ]
         })
-        .then(products => {
-            res.send(products)
+            .then(products => {
+                res.send(products)
+            })
+            .catch(error => {
+                res.status(500).send(error)
+            })
+    })
+
+    // update deposit status
+    router.put('/deposit/changeStatus', async (req, res) => {
+        await Deposit.update({
+            admin_status: req.body.admin_status
+        }, {
+            where: {
+                id: req.body.id,
+            }
+        })
+        .then(result => {
+            if(result[0] === 1) {
+                res.send({
+                    message: 'Thành công.'
+                })
+            } else {
+                res.status(500).send({
+                    message: 'Chưa có gì được cập nhật.'
+                })
+            }
         })
         .catch(error => {
-            res.status(500).send(error)
+            res.status(403).send(error)
         })
     })
 
