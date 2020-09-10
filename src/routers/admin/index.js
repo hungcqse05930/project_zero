@@ -721,12 +721,12 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
                 ['date_updated', 'DESC']
             ]
         })
-        .then(updates => {
-            res.send(updates)
-        })
-        .catch(error => {
-            res.status(500).send(error)
-        })
+            .then(updates => {
+                res.send(updates)
+            })
+            .catch(error => {
+                res.status(500).send(error)
+            })
     })
 
     // IDENTITY
@@ -791,6 +791,12 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
             order: [
                 ['date_created', 'DESC']
             ],
+            attributes: {
+                include: [
+                    [Sequelize.col('Wallet.User.name'), 'user_name'],
+                    [Sequelize.col('Wallet.User.img_url'), 'user_img'],
+                ]
+            },
             include: [
                 {
                     model: Wallet,
@@ -798,23 +804,46 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
                     include: [
                         {
                             model: User,
-                            attributes: [
-                                'name',
-                                'img_url'
-                            ],
-                            required: true
+                            attributes: [],
+                            required: true,
                         }
                     ],
                     required: true,
                 }
             ],
         })
-            .then(identities => {
-                res.send(identities)
+            .then(transactions => {
+                res.send(transactions)
             })
             .catch(error => {
                 res.status(500).send(error)
             })
+    })
+
+    // change transaction status
+    router.put('/transaction/request', async (req, res) => {
+        await TransactionRequest.update({
+            accepted: req.body.accepted
+        }, {
+            where: {
+                id: req.body.id
+            }
+        })
+        .then(result => {
+            result[0] === 1 ?
+            res.send({
+                message: 'Thành công.'
+            })
+            :
+            res.status(500).send({
+                message: 'Thất bại.'
+            })
+        })
+        .catch(error => {
+            res.status(500).send({
+                message: error.message
+            })
+        })
     })
 
     return router
