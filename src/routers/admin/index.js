@@ -972,6 +972,25 @@ const createAdminRouter = ({ Admin, Affair, Auction, Identity, Deposit, Product,
         })
     })
 
+    // TRANSACTION
+    // create transaction
+    router.post('/transaction', async (req, res) => {
+        await Transaction.create({
+            src_wallet_id: req.body.src_wallet_id,
+            rcv_wallet_id: req.body.rcv_wallet_id,
+            amount: req.body.amount,
+            notes: req.body.notes
+        })
+        .then(() => {
+            res.send({
+                message: 'Thành công.'
+            })
+        })
+        .catch(error => {
+            res.status(500).send(error)
+        })
+    })
+
     return router
 }
 
